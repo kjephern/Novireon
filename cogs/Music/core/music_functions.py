@@ -259,7 +259,7 @@ class Functions:
 
                     match region:
                         case "youtube":
-                            song_data = await Youtube.get_data(song_url)
+                            song_data = await Youtube.get_data_from_single(song_url)
                     if not future.done():
                         future.set_result(song_data)
 

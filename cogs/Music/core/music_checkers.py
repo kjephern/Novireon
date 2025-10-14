@@ -32,7 +32,6 @@ class Checkers:
             await itat.followup.send(
                 "您必須先加入一個語音頻道才能使用此指令！",
                 ephemeral=True,
-                delete_after=5,
             )
             return False
         if guild_id not in voice_data:

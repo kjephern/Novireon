@@ -15,13 +15,6 @@ logger = logging.getLogger("Music_Utils")
 
 mongo_client = MongoClient("mongodb://localhost:27017/", serverSelectionTimeoutMS=15000)
 
-music_db_handler = MongoCRUD(
-    client=mongo_client,
-    db_name="Norvireon_bot_db",
-    collection_name="Music_data",
-    logger=logger,
-)
-
 db_handler = MongoCRUD(
     client=mongo_client,
     db_name="Norvireon_bot_db",
@@ -40,7 +33,7 @@ def generate_progress_bar(guild_id):
     data = db_handler.get(query={"_id": guild_id})[0]
     is_playing = data.get("is_playing")
     start_time = data["start_time"]
-    duration = data["duration"]
+    duration = data["current_playing"]["duration"]
     total_paused_duration = data["total_paused_duration"]
     author = data.get("author", "Unknown Artist")
     if duration == 0:
@@ -86,7 +79,7 @@ def is_valid_url(url):
 
 def return_to_default_music_settings(guild_id):
     try:
-        music_db_handler.update_one(
+        db_handler.update_one(
             query={"_id": guild_id},
             new_values={
                 "current_playing": {},

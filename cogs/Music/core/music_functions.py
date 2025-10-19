@@ -89,8 +89,6 @@ class Functions:
                 query={"_id": guild_id},
                 new_values={
                     "start_time": time.time(),
-                    "duration": next_song_data["duration"],
-                    "song_url": next_song_data["song_url"],
                     "pause_time": None,
                     "total_paused_duration": None,
                     "is_playing": True,

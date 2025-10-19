@@ -43,8 +43,8 @@ class Music(commands.Cog):
         self.bot = bot
         logger.info("Music Cog initialized with DB handler.")
 
-    @app_commands.guild_only()
     @app_commands.command(name="play", description="播放音樂")
+    @app_commands.guild_install()
     @app_commands.describe(request="可使用網址或直接搜尋")
     @Checkers.is_in_valid_voice_channel()
     async def command_play(self, itat: Itat, request: str):
@@ -124,8 +124,8 @@ class Music(commands.Cog):
             logger.error(f"Command_play Error {e}")
             await itat.followup.send("執行指令時發生錯誤，請稍後再試。", ephemeral=True)
 
-    @app_commands.guild_only()
     @app_commands.command(name="play_playlist", description="播放播放列表")
+    @app_commands.guild_install()
     @Checkers.is_in_valid_voice_channel()
     @app_commands.describe(
         request="僅可使用youtube網址", max_results="最多加入幾首歌，預設5，最多25"
@@ -214,8 +214,8 @@ class Music(commands.Cog):
             logger.error(f"Command_play_playlist Error {e}")
             await itat.followup.send("執行指令時發生錯誤，請稍後再試。", ephemeral=True)
 
-    @app_commands.guild_only()
     @app_commands.command(name="stop", description="停止播放音樂")
+    @app_commands.guild_install()
     @Checkers.is_dj()
     @Checkers.is_in_valid_voice_channel()
     async def command_stop(self, itat: Itat):
@@ -223,8 +223,8 @@ class Music(commands.Cog):
         guild_id = itat.guild_id
         await Functions._stop(guild_id)
 
-    @app_commands.guild_only()
     @app_commands.command(name="skip", description="跳過當前曲目")
+    @app_commands.guild_install()
     @Checkers.is_dj()
     @Checkers.is_in_valid_voice_channel()
     async def command_skip(self, itat: Itat):
@@ -232,8 +232,8 @@ class Music(commands.Cog):
         guild_id = itat.guild_id
         await Functions._skip(guild_id)
 
-    @app_commands.guild_only()
     @app_commands.command(name="pause", description="暫停音樂")
+    @app_commands.guild_install()
     @Checkers.is_dj()
     @Checkers.is_in_valid_voice_channel()
     async def command_pause(self, itat: Itat):
@@ -241,8 +241,8 @@ class Music(commands.Cog):
         guild_id = itat.guild_id
         await Functions._pause(guild_id)
 
-    @app_commands.guild_only()
     @app_commands.command(name="resume", description="繼續播放")
+    @app_commands.guild_install()
     @Checkers.is_dj()
     @Checkers.is_in_valid_voice_channel()
     async def command_resume(self, itat: Itat):

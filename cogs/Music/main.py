@@ -11,12 +11,12 @@ from discord.ext import commands
 from pymongo import MongoClient
 
 from mongo_crud import MongoCRUD
-from . import music_utils
-from .music_checkers import Checkers
-from .music_data import voice_data
-from .music_functions import Functions
-from ..monster_siren import Monster_siren
-from ..youtube import Youtube
+from .core import music_utils
+from .core.music_checkers import Checkers
+from .core.music_data import voice_data
+from .core.music_functions import Functions
+from .monster_siren import Monster_siren
+from .youtube import Youtube
 
 
 logging.basicConfig(level=logging.INFO)
@@ -43,6 +43,7 @@ class Music(commands.Cog):
         self.bot = bot
         logger.info("Music Cog initialized with DB handler.")
 
+    @app_commands.guild_only()
     @app_commands.command(name="play", description="播放音樂")
     @app_commands.describe(request="可使用網址或直接搜尋")
     @Checkers.is_in_valid_voice_channel()
@@ -123,6 +124,7 @@ class Music(commands.Cog):
             logger.error(f"Command_play Error {e}")
             await itat.followup.send("執行指令時發生錯誤，請稍後再試。", ephemeral=True)
 
+    @app_commands.guild_only()
     @app_commands.command(name="play_playlist", description="播放播放列表")
     @Checkers.is_in_valid_voice_channel()
     @app_commands.describe(
@@ -196,7 +198,7 @@ class Music(commands.Cog):
                     await itat.channel.send(embed=embed)
                     await asyncio.sleep(1)
                 except Exception as e:
-                    itat.channel.send(
+                    await itat.channel.send(
                         "加入播放列表時發生錯誤，部分歌曲可能未加入佇列。"
                     )
                     logger.error(f"Error adding song from playlist: {e}")
@@ -212,6 +214,7 @@ class Music(commands.Cog):
             logger.error(f"Command_play_playlist Error {e}")
             await itat.followup.send("執行指令時發生錯誤，請稍後再試。", ephemeral=True)
 
+    @app_commands.guild_only()
     @app_commands.command(name="stop", description="停止播放音樂")
     @Checkers.is_dj()
     @Checkers.is_in_valid_voice_channel()
@@ -220,6 +223,7 @@ class Music(commands.Cog):
         guild_id = itat.guild_id
         await Functions._stop(guild_id)
 
+    @app_commands.guild_only()
     @app_commands.command(name="skip", description="跳過當前曲目")
     @Checkers.is_dj()
     @Checkers.is_in_valid_voice_channel()
@@ -228,6 +232,7 @@ class Music(commands.Cog):
         guild_id = itat.guild_id
         await Functions._skip(guild_id)
 
+    @app_commands.guild_only()
     @app_commands.command(name="pause", description="暫停音樂")
     @Checkers.is_dj()
     @Checkers.is_in_valid_voice_channel()
@@ -236,6 +241,7 @@ class Music(commands.Cog):
         guild_id = itat.guild_id
         await Functions._pause(guild_id)
 
+    @app_commands.guild_only()
     @app_commands.command(name="resume", description="繼續播放")
     @Checkers.is_dj()
     @Checkers.is_in_valid_voice_channel()

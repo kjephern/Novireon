@@ -1,5 +1,5 @@
 from discord.ext import commands
-from .core.music_main import Music
+from .main import Music
 from .core.music_setup import MusicSetup
 import logging
 

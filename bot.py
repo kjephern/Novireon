@@ -1,13 +1,9 @@
-import asyncio
 import discord
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
 import logging
 from logging_config import setup_logging
-from mongo_crud import MongoCRUD
-from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
 
 
 _log = logging.getLogger(__name__)
@@ -18,7 +14,10 @@ DEFAULT_PREFIX = os.getenv("DEFAULT_PREFIX", "!")
 
 intents = discord.Intents.all()
 
-bot = commands.Bot(command_prefix=DEFAULT_PREFIX, intents=intents)
+bot = commands.Bot(
+    command_prefix=DEFAULT_PREFIX,
+    intents=intents,
+)
 
 
 async def load_all_cogs(bot_instance):

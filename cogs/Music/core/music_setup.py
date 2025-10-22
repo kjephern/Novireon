@@ -26,7 +26,11 @@ class MusicSetup(commands.Cog):
         self.bot = bot
 
     music_setup = app_commands.Group(
-        name="music_setup", description="Music setting up commands.", guild_only=True
+        name="music_setup",
+        description="Music setting up commands.",
+        guild_only=True,
+        allowed_installs=app_commands.AppInstallationType(guild=True, user=False),
+        default_permissions=discord.Permissions(manage_guild=True),
     )
 
     @music_setup.command(
@@ -34,7 +38,6 @@ class MusicSetup(commands.Cog):
     )
     @app_commands.guild_install()
     @app_commands.describe(channel="用於發送指令的文字頻道ID，留白則允許所有頻道。")
-    @app_commands.checks.has_permissions(manage_guild=True)
     async def set_music_channel(
         self, itat: discord.Interaction, channel: discord.TextChannel = None
     ):
@@ -55,7 +58,6 @@ class MusicSetup(commands.Cog):
     @music_setup.command(name="dj_role", description="使定可控制音樂播放的身分組")
     @app_commands.guild_install()
     @app_commands.describe(role="被指定為'DJ'的身分組。留白則僅管理員可控制。")
-    @app_commands.checks.has_permissions(manage_guild=True)
     async def set_dj_role(self, itat: discord.Interaction, role: discord.Role = None):
         if role:
             db_handler.update_one(

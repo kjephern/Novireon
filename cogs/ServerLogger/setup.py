@@ -88,7 +88,7 @@ class ServerLoggerSetup:
         if data:
             data = data[0]
         else:
-            await itat.response.send_message(
+            await itat.followup.send(
                 "尚未設定伺服器日誌。請使用 /server_logger toggle 來啟用日誌記錄。",
                 ephemeral=True,
             )

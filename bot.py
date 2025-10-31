@@ -20,31 +20,23 @@ bot = commands.Bot(
 )
 
 
-async def load_all_cogs(bot_instance):
-    cogs_base_dir = "cogs"
-    for item_name in os.listdir(cogs_base_dir):
-        item_path = os.path.join(cogs_base_dir, item_name)
-        if os.path.isdir(item_path) and "__init__.py" in os.listdir(item_path):
-            module_path = f"{cogs_base_dir}.{item_name}"
-            try:
-                await bot_instance.load_extension(module_path)
-                _log.info(f"Loaded Cog Package: {module_path}")
-            except Exception as e:
-                _log.error(
-                    f"Failed to load Cog Package {module_path}: {e}", exc_info=True
-                )
-    src_base_dir = "src"
-    for item_name in os.listdir(src_base_dir):
-        item_path = os.path.join(src_base_dir, item_name)
-        if os.path.isdir(item_path) and "__init__.py" in os.listdir(item_path):
-            module_path = f"src.{item_name}"
-            try:
-                await bot_instance.load_extension(module_path)
-                _log.info(f"Loaded Cog Package: {module_path}")
-            except Exception as e:
-                _log.error(
-                    f"Failed to load Cog Package {module_path}: {e}", exc_info=True
-                )
+async def load_all_cogs(bot):
+    loaded_packages = []
+    base_dirs = ["cogs", "src"]
+    for base in base_dirs:
+        for item_name in os.listdir(base):
+            item_path = os.path.join(base, item_name)
+            if os.path.isdir(item_path) and "__init__.py" in os.listdir(item_path):
+                module_path = f"{base}.{item_name}"
+                try:
+                    await bot.load_extension(module_path)
+                    loaded_packages.append(module_path)
+                except Exception as e:
+                    _log.error(
+                        f"Failed to load Cog Package {module_path}: {e}", exc_info=True
+                    )
+    for package in loaded_packages:
+        _log.info(f"Loaded Cog Package: {package}")
 
 
 @bot.event
@@ -54,6 +46,8 @@ async def on_ready():
     _log.info(f"Logged in as {bot.user.name} ({bot.user.id})")
     _log.info("syncing...")
     await bot.tree.sync()
+    for guild in bot.guilds:
+        print(f"- 伺服器: {guild.name} (ID: {guild.id})")
     _log.info(">>Bot is online<<")
 
 

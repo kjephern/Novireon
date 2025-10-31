@@ -1,5 +1,9 @@
+import time
+
 import discord
 from discord.ext import commands
+
+from cogs.ServerLogger.main import ServerLoggerMain as SLM
 
 import logging
 
@@ -10,7 +14,6 @@ logger = logging.getLogger("discord_event_watcher.message")
 class MessageWatcher:
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.bot.add_listener
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -18,11 +21,23 @@ class MessageWatcher:
             return
 
     @commands.Cog.listener()
-    async def on_message_edit(self, before: discord.Message, after: discord.Message):
+    async def on_raw_message_edit(self, payload: discord.RawMessageUpdateEvent):
+        before = payload.cached_message or None
+        after = payload.message
         if after.author.bot:
             return
+        server_logger_cog = self.bot.get_cog("ServerLogger")
+        await server_logger_cog.message_event(
+            before=before, after=after, event_type="edit"
+        )
 
     @commands.Cog.listener()
-    async def on_message_delete(self, message: discord.Message):
-        if message.author.bot:
+    async def on_raw_message_delete(self, payload: discord.RawMessageUpdateEvent):
+        before = payload.cached_message or None
+        after = payload.message
+        if after.author.bot:
             return
+        server_logger_cog = self.bot.get_cog("ServerLogger")
+        await server_logger_cog.message_event(
+            before=before, after=after, event_type="delete"
+        )

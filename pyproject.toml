@@ -12,6 +12,7 @@ dependencies = [
     "pymongo>=4.15.1",
     "pynacl>=1.6.0",
     "python-dotenv>=1.1.1",
+    "pytz>=2025.2",
     "requests>=2.32.5",
     "soundfile>=0.13.1",
     "yt-dlp>=2025.9.26",

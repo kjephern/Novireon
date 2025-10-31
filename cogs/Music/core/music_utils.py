@@ -93,4 +93,4 @@ def return_to_default_music_settings(guild_id):
         )
         logger.info("returned to default music settings.")
     except Exception as e:
-        logger.critical(f"Can not return to default music seettings!")
+        logger.critical(f"Can not return to default music settings!")

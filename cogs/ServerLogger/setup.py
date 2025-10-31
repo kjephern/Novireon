@@ -115,7 +115,7 @@ class ServerLoggerSetup:
         embed.color = (
             discord.Color.green() if is_logging_enabled else discord.Color.red()
         )
-        await itat.response.send_message(embed=embed, ephemeral=True)
+        await itat.followup.send(embed=embed, ephemeral=True)
 
     @server_logger.command(
         name="ignore_channel", description="新增/移除日誌忽略記錄的頻道"

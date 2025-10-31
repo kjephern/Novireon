@@ -28,7 +28,6 @@ class MusicSetup(commands.Cog):
     music_setup = app_commands.Group(
         name="music_setup",
         description="Music setting up commands.",
-        guild_only=True,
         allowed_installs=app_commands.AppInstallationType(guild=True, user=False),
         default_permissions=discord.Permissions(manage_guild=True),
     )

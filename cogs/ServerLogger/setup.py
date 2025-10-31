@@ -173,6 +173,8 @@ class ServerLoggerSetup:
         data = db_handler.get(query={"_id": guild_id})
         if data:
             data = data[0]
+        else:
+            data = {}
         old_channel_id = (
             data.get("settings", {})
             .get("logging_channel_id", {})

@@ -44,7 +44,7 @@ class MongoCRUD:
             )
             return []
 
-    def update_many(self, query: dict, new_values: dict):
+    def update_many(self, query: dict, new_values: dict = {}):
         """更新文件。"""
         self.logger.debug(
             f"Executing update_many with query: {query} and values: {new_values}"

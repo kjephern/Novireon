@@ -1,0 +1,174 @@
+from datetime import datetime
+import os
+import pytz
+
+import discord
+from discord import Message, Member, Embed, Color
+from discord.ext import commands
+
+from .utils import Utils
+
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("server_logger.main")
+
+from pymongo import MongoClient
+from mongo_crud import MongoCRUD
+
+mongo_uri = os.getenv("MONGO_URI")
+mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=15000)
+db_handler = MongoCRUD(
+    client=mongo_client,
+    db_name="Norvireon_bot_db",
+    collection_name="Server_logger_data",
+    logger=logger,
+)
+
+
+class ServerLoggerMain:
+    def __init__(self, bot):
+        self.bot: commands.Bot = bot
+
+    async def message_event(self, before: Message, after: Message, event_type: str):
+        guild_id = after.guild.id
+        channel_id = after.channel.id
+        data = db_handler.get(query={"_id": guild_id})
+        if not data:
+            return
+        data = data[0]
+        settings = data.get("settings", {})
+        logging_channel_id = settings.get("logging_channel_id", {})
+        message_channel_id = logging_channel_id.get("message", None)
+        if not message_channel_id:
+            message_channel_id = logging_channel_id.get("default", None)
+            if not message_channel_id:
+                return
+            if message_channel_id:
+                channel: discord.TextChannel = self.bot.get_channel(message_channel_id)
+                if not channel:
+                    channel = await self.bot.fetch_channel(message_channel_id)
+                if not channel:
+                    return
+        is_logging_enabled = settings.get("is_logging_enabled", False)
+        if not is_logging_enabled:
+            return
+        ignore_list = Utils.get_ignore_list(guild_id)
+        if channel_id in ignore_list:
+            return
+        embed = Embed()
+        embed.set_author(
+            url=after.author.display_avatar.url,
+            name=after.author.display_name,
+        )
+        embed.set_thumbnail(url=after.author.display_avatar.url)
+        embed.add_field(
+            name="原始訊息",
+            value=before.content if before else "無法獲取訊息",
+            inline=False,
+        )
+        match event_type:
+            case "edit":
+                embed.title = f"訊息在 {after.jump_url} 被編輯"
+                embed.color = Color.blue()
+                embed.add_field(
+                    name="編輯後訊息",
+                    value=after.content or "無法獲取訊息",
+                    inline=False,
+                )
+            case "delete":
+                embed.title = f"訊息在 {after.jump_url} 被刪除"
+                embed.color = Color.red()
+
+        taipei_tz = pytz.timezone("Asia/Taipei")
+        current_time = datetime.now().timestamp()
+        embed.set_footer(
+            text=f"Message ID: {after.id}\nEdited at {datetime.fromtimestamp(current_time,tz=taipei_tz).strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        await channel.send(embed=embed, silent=True)
+        return
+
+    async def member_event(self, before: Member, after: Member, event_type: str):
+        guild_id = after.guild.id
+        data = db_handler.get(query={"_id": guild_id})
+        if not data:
+            return
+        data = data[0]
+        settings = data.get("settings", {})
+        logging_channel_id = settings.get("logging_channel_id", {})
+        member_channel_id = logging_channel_id.get("member", None)
+        if not member_channel_id:
+            member_channel_id = logging_channel_id.get("default", None)
+            if not member_channel_id:
+                return
+            if member_channel_id:
+                channel: discord.TextChannel = self.bot.get_channel(member_channel_id)
+                if not channel:
+                    channel = await self.bot.fetch_channel(member_channel_id)
+                if not channel:
+                    return
+        is_logging_enabled = settings.get("is_logging_enabled", False)
+        if not is_logging_enabled:
+            return
+        embed = Embed()
+        embed.set_author(
+            url=after.display_avatar.url,
+            name=after.display_name,
+        )
+        embed.set_thumbnail(url=after.display_avatar.url)
+        match event_type:
+            case "nick":
+                embed.title = f"{after.mention} 更改了暱稱"
+                embed.color = Color.blue()
+                embed.add_field(
+                    name="更改前暱稱",
+                    value=before.nick or before.name,
+                    inline=False,
+                )
+                embed.add_field(
+                    name="更改後暱稱",
+                    value=after.nick or "無暱稱",
+                    inline=False,
+                )
+            case "role":
+                before_roles = set(before.roles)
+                after_roles = set(after.roles)
+                added_roles = after_roles - before_roles
+                removed_roles = before_roles - after_roles
+                embed.title = f"{after.mention} 身分組變更"
+                embed.color = Color.purple()
+                if added_roles:
+                    embed.add_field(
+                        name=f"新增身分組",
+                        value="\n".join(
+                            [
+                                role.mention
+                                for role in added_roles
+                                if role.is_default() is False
+                            ]
+                        ),
+                        inline=False,
+                    )
+                if removed_roles:
+                    embed.add_field(
+                        name=f"移除身分組",
+                        value="\n".join(
+                            [
+                                role.mention
+                                for role in removed_roles
+                                if role.is_default() is False
+                            ]
+                        ),
+                        inline=False,
+                    )
+            case "guild_avatar":
+                pass
+            case "pending":
+                pass
+        taipei_tz = pytz.timezone("Asia/Taipei")
+        current_time = datetime.now().timestamp()
+        embed.set_footer(
+            text=f"Member ID: {after.id}\nUpdated at {datetime.fromtimestamp(current_time,tz=taipei_tz).strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        await channel.send(embed=embed, silent=True)
+        return

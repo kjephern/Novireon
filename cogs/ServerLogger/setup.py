@@ -151,7 +151,7 @@ class ServerLoggerSetup:
             f"已忽略紀錄 {channel.mention} 的變化", ephemeral=True
         )
 
-    @server_logger.command(name="default", description="設定伺服器日誌的頻道")
+    @server_logger.command(name="set log channel", description="設定伺服器日誌的頻道")
     @app_commands.choices(
         logging_type=[
             app_commands.Choice(name="預設", value="default"),
@@ -163,7 +163,7 @@ class ServerLoggerSetup:
         ]
     )
     @app_commands.guild_install()
-    async def set_default_channel(
+    async def set_log_channel(
         self,
         itat: discord.Interaction,
         channel: discord.TextChannel,

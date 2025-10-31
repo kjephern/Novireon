@@ -33,6 +33,18 @@ async def load_all_cogs(bot_instance):
                 _log.error(
                     f"Failed to load Cog Package {module_path}: {e}", exc_info=True
                 )
+    src_base_dir = "src"
+    for item_name in os.listdir(src_base_dir):
+        item_path = os.path.join(src_base_dir, item_name)
+        if os.path.isdir(item_path) and "__init__.py" in os.listdir(item_path):
+            module_path = f"src.{item_name}"
+            try:
+                await bot_instance.load_extension(module_path)
+                _log.info(f"Loaded Cog Package: {module_path}")
+            except Exception as e:
+                _log.error(
+                    f"Failed to load Cog Package {module_path}: {e}", exc_info=True
+                )
 
 
 @bot.event

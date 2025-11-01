@@ -31,14 +31,14 @@ class ServerLoggerMain:
         self.bot: commands.Bot = bot
 
     async def message_event(self, before: Message, after: Message, event_type: str):
-        guild_id = message.guild.id
-        channel_id = message.channel.id
         if before:
             message = before
         elif after:
             message = after
         else:
             return
+        guild_id = message.guild.id
+        channel_id = message.channel.id
         # 驗證設定
         data = db_handler.get(query={"_id": guild_id})
         if not data:

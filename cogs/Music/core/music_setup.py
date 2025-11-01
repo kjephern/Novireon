@@ -21,7 +21,7 @@ db_handler = MongoCRUD(
 )
 
 
-class MusicSetup(commands.Cog):
+class MusicSetup:
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 

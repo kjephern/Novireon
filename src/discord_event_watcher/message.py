@@ -37,4 +37,6 @@ class MessageWatcher:
         if before.author.bot or not before:
             return
         server_logger_cog = self.bot.get_cog("ServerLogger")
-        await server_logger_cog.message_event(before=before, event_type="delete")
+        await server_logger_cog.message_event(
+            before=before, after=None, event_type="delete"
+        )

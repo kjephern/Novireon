@@ -24,7 +24,7 @@ class MessageWatcher:
     async def on_raw_message_edit(self, payload: discord.RawMessageUpdateEvent):
         before = payload.cached_message or None
         after = payload.message
-        if after.author.bot:
+        if after.author.bot or not after:
             return
         server_logger_cog = self.bot.get_cog("ServerLogger")
         await server_logger_cog.message_event(
@@ -32,12 +32,9 @@ class MessageWatcher:
         )
 
     @commands.Cog.listener()
-    async def on_raw_message_delete(self, payload: discord.RawMessageUpdateEvent):
+    async def on_raw_message_delete(self, payload: discord.RawMessageDeleteEvent):
         before = payload.cached_message or None
-        after = payload.message
-        if after.author.bot:
+        if before.author.bot or not before:
             return
         server_logger_cog = self.bot.get_cog("ServerLogger")
-        await server_logger_cog.message_event(
-            before=before, after=after, event_type="delete"
-        )
+        await server_logger_cog.message_event(before=before, event_type="delete")

@@ -1,18 +1,19 @@
 from discord.ext import commands
-from .main import Music
+from .main import MusicMain
 from .core.music_setup import MusicSetup
+
 import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("Music_Core")
 
 
-async def setup(bot: commands.Bot) -> None:
-    for vc in bot.voice_clients:
-        try:
-            await vc.disconnect(force=True)
-            print("a")
-        except Exception as e:
-            logger.error(f"cleaning VC connect error: {e}")
+class Music(commands.Cog, name="Music"):
+    def __init__(self, bot: commands.Bot):
+        commands.Cog.__init__(self)
+        MusicMain.__init__(self, bot)
+        MusicSetup.__init__(self, bot)
+
+
+async def setup(bot: commands.Bot):
     await bot.add_cog(Music(bot))
-    await bot.add_cog(MusicSetup(bot))

@@ -13,7 +13,7 @@ youtube_watch_url = youtube_base_url + "watch?v="
 youtube = build("youtube", "v3", developerKey=YOUTUBE_API_KEY)
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("Youtube")
+logger = logging.getLogger("music.youtube")
 
 
 class Youtube:

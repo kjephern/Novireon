@@ -20,7 +20,7 @@ from .youtube import Youtube
 
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("Music_Main")
+logger = logging.getLogger("music.main")
 
 ffmpeg_options = {
     "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
@@ -38,10 +38,9 @@ db_handler = MongoCRUD(
 )
 
 
-class Music(commands.Cog):
+class MusicMain(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        logger.info("Music Cog initialized with DB handler.")
 
     music = app_commands.Group(
         name="music",

@@ -129,9 +129,8 @@ class MongoCRUD:
 
         Args:
             query (dict): 查詢條件。
-            field (str): 要操作的陣列欄位名稱 (例如 "queue")。
+            field (str): 要操作的陣列欄位名稱。
             direction (int): -1 表示彈出第一個元素 (FIFO), 1 表示彈出最後一個元素 (LIFO)。
-                            音樂佇列通常使用 -1。
 
         Returns:
             dict | None: 被彈出的元素 (如果成功)，否則返回 None。
@@ -162,8 +161,6 @@ class MongoCRUD:
                 return None
 
             # 根據彈出的方向，返回正確的元素
-            # 如果 direction 是 -1 (從頭部彈出)，被彈出的元素就是陣列的第一個
-            # 如果 direction 是 1 (從尾部彈出)，被彈出的元素就是陣列的最後一個
             popped_element = (
                 array_before_pop[0] if direction == -1 else array_before_pop[-1]
             )

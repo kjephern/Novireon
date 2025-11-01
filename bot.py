@@ -20,7 +20,7 @@ bot = commands.Bot(
 )
 
 
-async def load_all_cogs(bot):
+async def load_all_cogs(bot: commands.Bot):
     loaded_packages = []
     base_dirs = ["cogs", "src"]
     for base in base_dirs:

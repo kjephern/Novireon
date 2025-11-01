@@ -34,7 +34,7 @@ class MessageWatcher:
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload: discord.RawMessageDeleteEvent):
         before = payload.cached_message or None
-        if before.author.bot or not before:
+        if not before or before.author.bot:
             return
         server_logger_cog = self.bot.get_cog("ServerLogger")
         await server_logger_cog.message_event(

@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("Music_Core")
 
 
-class Music(commands.Cog, name="Music"):
+class Music(commands.Cog, MusicMain, MusicSetup):
     def __init__(self, bot: commands.Bot):
         commands.Cog.__init__(self)
         MusicMain.__init__(self, bot)

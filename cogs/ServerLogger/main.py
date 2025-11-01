@@ -81,7 +81,7 @@ class ServerLoggerMain:
                 embed.color = Color.blue()
                 embed.add_field(
                     name="編輯後訊息",
-                    value=message.content or "無法獲取訊息",
+                    value=after.content or "無法獲取訊息",
                     inline=False,
                 )
             case "delete":

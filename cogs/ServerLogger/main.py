@@ -31,8 +31,15 @@ class ServerLoggerMain:
         self.bot: commands.Bot = bot
 
     async def message_event(self, before: Message, after: Message, event_type: str):
-        guild_id = after.guild.id
-        channel_id = after.channel.id
+        guild_id = message.guild.id
+        channel_id = message.channel.id
+        if before:
+            message = before
+        elif after:
+            message = after
+        else:
+            return
+        # 驗證設定
         data = db_handler.get(query={"_id": guild_id})
         if not data:
             return
@@ -44,24 +51,25 @@ class ServerLoggerMain:
             message_channel_id = logging_channel_id.get("default", None)
             if not message_channel_id:
                 return
-            if message_channel_id:
-                channel: discord.TextChannel = self.bot.get_channel(message_channel_id)
-                if not channel:
-                    channel = await self.bot.fetch_channel(message_channel_id)
-                if not channel:
-                    return
+        # 取得頻道
+        channel: discord.TextChannel = self.bot.get_channel(message_channel_id)
+        if not channel:
+            channel = await self.bot.fetch_channel(message_channel_id)
+        if not channel:
+            return
         is_logging_enabled = settings.get("is_logging_enabled", False)
         if not is_logging_enabled:
             return
         ignore_list = Utils.get_ignore_list(guild_id)
         if channel_id in ignore_list:
             return
+        # 建立訊息
         embed = Embed()
         embed.set_author(
-            url=after.author.display_avatar.url,
-            name=after.author.display_name,
+            url=message.author.display_avatar.url,
+            name=message.author.display_name,
         )
-        embed.set_thumbnail(url=after.author.display_avatar.url)
+        embed.set_thumbnail(url=message.author.display_avatar.url)
         embed.add_field(
             name="原始訊息",
             value=before.content if before else "無法獲取訊息",
@@ -69,21 +77,21 @@ class ServerLoggerMain:
         )
         match event_type:
             case "edit":
-                embed.title = f"訊息在 {after.jump_url} 被編輯"
+                embed.title = f"訊息在 {message.jump_url} 被編輯"
                 embed.color = Color.blue()
                 embed.add_field(
                     name="編輯後訊息",
-                    value=after.content or "無法獲取訊息",
+                    value=message.content or "無法獲取訊息",
                     inline=False,
                 )
             case "delete":
-                embed.title = f"訊息在 {after.jump_url} 被刪除"
+                embed.title = f"訊息在 {before.jump_url} 被刪除"
                 embed.color = Color.red()
-
+        # 發送訊息
         taipei_tz = pytz.timezone("Asia/Taipei")
         current_time = datetime.now().timestamp()
         embed.set_footer(
-            text=f"Message ID: {after.id}\nEdited at {datetime.fromtimestamp(current_time,tz=taipei_tz).strftime('%Y-%m-%d %H:%M:%S')}"
+            text=f"Message ID: {message.id}\nEdited at {datetime.fromtimestamp(current_time,tz=taipei_tz).strftime('%Y-%m-%d %H:%M:%S')}"
         )
         await channel.send(embed=embed, silent=True)
         return
@@ -149,6 +157,8 @@ class ServerLoggerMain:
                         ),
                         inline=False,
                     )
+                    if not removed_roles:
+                        embed.color = Color.green()
                 if removed_roles:
                     embed.add_field(
                         name=f"移除身分組",
@@ -161,6 +171,8 @@ class ServerLoggerMain:
                         ),
                         inline=False,
                     )
+                    if not added_roles:
+                        embed.color = Color.red()
             case "guild_avatar":
                 pass
             case "pending":

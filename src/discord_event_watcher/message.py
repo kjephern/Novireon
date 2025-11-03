@@ -24,7 +24,9 @@ class MessageWatcher:
     async def on_raw_message_edit(self, payload: discord.RawMessageUpdateEvent):
         before = payload.cached_message or None
         after = payload.message
-        if after.author.bot or not after:
+        if not after or after.author.bot:
+            return
+        if before.content == after.content:
             return
         server_logger_cog = self.bot.get_cog("ServerLogger")
         await server_logger_cog.message_event(

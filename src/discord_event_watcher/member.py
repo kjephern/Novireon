@@ -15,12 +15,12 @@ class MemberWatcher:
     async def on_member_update(self, before: discord.Member, after: discord.Member):
         if before.nick != after.nick:
             event_type = "nick"
-        if before.roles != after.roles:
+        elif before.roles != after.roles:
             event_type = "role"
-        if before.guild_avatar != after.guild_avatar:
-            event_type = "guild_avatar"
-        if before.pending != after.pending:
+        elif before.pending != after.pending:
             event_type = "pending"
+        else:
+            return
         server_logger_cog = self.bot.get_cog("ServerLogger")
         await server_logger_cog.member_event(
             before=before, after=after, event_type=event_type
@@ -30,11 +30,15 @@ class MemberWatcher:
     async def on_user_update(self, before: discord.User, after: discord.User):
         if before.avatar.key != after.avatar.key:
             event_type = "avatar"
-        if before.username != after.username:
+        elif before.global_name != after.global_name:
+            event_type = "global_name"
+        elif before.name != after.name:
             event_type = "username"
-        if before.discriminator != after.discriminator:
+        elif before.discriminator != after.discriminator:
             event_type = "discriminator"
+        else:
+            return
         server_logger_cog = self.bot.get_cog("ServerLogger")
-        await server_logger_cog.member_event(
+        await server_logger_cog.user_event(
             before=before, after=after, event_type=event_type
         )

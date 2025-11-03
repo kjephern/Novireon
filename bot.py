@@ -10,14 +10,10 @@ _log = logging.getLogger(__name__)
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD")
-DEFAULT_PREFIX = os.getenv("DEFAULT_PREFIX", "!")
 
 intents = discord.Intents.all()
 
-bot = commands.Bot(
-    command_prefix=DEFAULT_PREFIX,
-    intents=intents,
-)
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 
 async def load_all_cogs(bot: commands.Bot):

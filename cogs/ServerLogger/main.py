@@ -3,7 +3,7 @@ import os
 import pytz
 
 import discord
-from discord import Message, Member, Embed, Color
+from discord import Message, Member, Embed, Color, User
 from discord.ext import commands
 
 from .utils import Utils
@@ -103,6 +103,9 @@ class ServerLoggerMain:
             return
         data = data[0]
         settings = data.get("settings", {})
+        is_logging_enabled = settings.get("is_logging_enabled", False)
+        if not is_logging_enabled:
+            return
         logging_channel_id = settings.get("logging_channel_id", {})
         member_channel_id = logging_channel_id.get("member", None)
         if not member_channel_id:
@@ -115,18 +118,16 @@ class ServerLoggerMain:
                     channel = await self.bot.fetch_channel(member_channel_id)
                 if not channel:
                     return
-        is_logging_enabled = settings.get("is_logging_enabled", False)
-        if not is_logging_enabled:
-            return
         embed = Embed()
         embed.set_author(
-            url=after.display_avatar.url,
+            icon_url=after.display_avatar.url,
             name=after.display_name,
         )
         embed.set_thumbnail(url=after.display_avatar.url)
         match event_type:
             case "nick":
-                embed.title = f"{after.mention} 更改了暱稱"
+                embed.title = f"暱稱更改"
+                embed.add_field(name="\u200b", value=after.mention, inline=False)
                 embed.color = Color.blue()
                 embed.add_field(
                     name="更改前暱稱",
@@ -143,7 +144,8 @@ class ServerLoggerMain:
                 after_roles = set(after.roles)
                 added_roles = after_roles - before_roles
                 removed_roles = before_roles - after_roles
-                embed.title = f"{after.mention} 身分組變更"
+                embed.title = f"身分組變更"
+                embed.add_field(name="\u200b", value=after.mention, inline=False)
                 embed.color = Color.purple()
                 if added_roles:
                     embed.add_field(
@@ -173,14 +175,103 @@ class ServerLoggerMain:
                     )
                     if not added_roles:
                         embed.color = Color.red()
-            case "guild_avatar":
-                pass
-            case "pending":
-                pass
         taipei_tz = pytz.timezone("Asia/Taipei")
         current_time = datetime.now().timestamp()
         embed.set_footer(
             text=f"Member ID: {after.id}\nUpdated at {datetime.fromtimestamp(current_time,tz=taipei_tz).strftime('%Y-%m-%d %H:%M:%S')}"
         )
         await channel.send(embed=embed, silent=True)
+        return
+
+    async def user_event(self, before: User, after: User, event_type: str):
+        guilds = after.mutual_guilds
+        channels = []
+        for guild in guilds:
+            guild_id = guild.id
+            data = db_handler.get(query={"_id": guild_id})
+            if not data:
+                return
+            data = data[0]
+            settings = data.get("settings", {})
+            is_logging_enabled = settings.get("is_logging_enabled", False)
+            if not is_logging_enabled:
+                return
+            logging_channel_id = settings.get("logging_channel_id", {})
+            member_channel_id = logging_channel_id.get("member", None)
+            if not member_channel_id:
+                member_channel_id = logging_channel_id.get("default", None)
+                if not member_channel_id:
+                    return
+                if member_channel_id:
+                    channel: discord.TextChannel = self.bot.get_channel(
+                        member_channel_id
+                    )
+                    if not channel:
+                        channel = await self.bot.fetch_channel(member_channel_id)
+                    if not channel:
+                        return
+            channels.append(channel)
+        if not channels:
+            return
+        embed = Embed()
+        embed.set_author(
+            icon_url=after.display_avatar.url,
+            name=after.display_name,
+        )
+        embed.set_thumbnail(url=after.display_avatar.url)
+        match event_type:
+            case "avatar":
+                embed.title = f"頭像更改"
+                embed.add_field(name="\u200b", value=after.mention, inline=False)
+                embed.color = Color.yellow()
+                embed.set_image(url=after.display_avatar.url)
+            case "global_name":
+                embed.title = f"顯示名稱更改"
+                embed.add_field(name="\u200b", value=after.mention, inline=False)
+                embed.color = Color.blue()
+                embed.add_field(
+                    name="更改前顯示名稱",
+                    value=before.global_name,
+                    inline=False,
+                )
+                embed.add_field(
+                    name="更改後顯示名稱",
+                    value=after.global_name,
+                    inline=False,
+                )
+            case "username":
+                embed.title = f"使用者名稱更改"
+                embed.color = Color.green()
+                embed.add_field(name="\u200b", value=after.mention, inline=False)
+                embed.add_field(
+                    name="更改前使用者名稱",
+                    value=before.name,
+                    inline=False,
+                )
+                embed.add_field(
+                    name="更改後使用者名稱",
+                    value=after.name,
+                    inline=False,
+                )
+            case "discriminator":
+                embed.title = f"自述更改"
+                embed.add_field(name="\u200b", value=after.mention, inline=False)
+                embed.color = Color.orange()
+                embed.add_field(
+                    name="更改前自述",
+                    value=before.discriminator,
+                    inline=False,
+                )
+                embed.add_field(
+                    name="更改後自述",
+                    value=after.discriminator,
+                    inline=False,
+                )
+        taipei_tz = pytz.timezone("Asia/Taipei")
+        current_time = datetime.now().timestamp()
+        embed.set_footer(
+            text=f"Member ID: {after.id}\nUpdated at {datetime.fromtimestamp(current_time,tz=taipei_tz).strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        for channel in channels:
+            await channel.send(embed=embed, silent=True)
         return

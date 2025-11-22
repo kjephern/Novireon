@@ -100,6 +100,9 @@ class Functions:
                 title=next_song_data["title"], description="播放中...", color=0xADC8FF
             )
             embed.set_thumbnail(url=next_song_data.get("thumbnail", ""))
+            requester = f'{next_song_data.get("requester", False)}'
+            if requester:
+                embed.add_field(name="\u200b", value=f"由{requester}加入")
             control_view = ControlView(guild_id)
             embed_msg = await music_channel.send(view=control_view, embed=embed)
             voice_data[guild_id]["state_embed_message"] = embed_msg

@@ -99,6 +99,13 @@ class MusicMain:
                 )
                 return
             else:
+                data.update(
+                    {
+                        "requester": (
+                            itat.user.nick if itat.user.nick else itat.user.display_name
+                        )
+                    }
+                )
                 db_handler.append(query={"_id": guild_id}, field="queue", value=data)
 
             title = data.get("title", "Unknown Title")

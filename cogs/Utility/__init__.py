@@ -1,13 +1,15 @@
 from discord.ext import commands
 from .ping import PingCommands
 from .miq import MIQ
+from .roll import Roll
 
 
-class Utility(commands.Cog, PingCommands, MIQ):
+class Utility(commands.Cog, PingCommands, MIQ, Roll):
     def __init__(self, bot: commands.Bot):
         commands.Cog.__init__(self)
         MIQ.__init__(self, bot)
         PingCommands.__init__(self, bot)
+        Roll.__init__(self, bot)
 
 
 async def setup(bot: commands.Bot):

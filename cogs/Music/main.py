@@ -44,7 +44,7 @@ class MusicMain:
 
     music = app_commands.Group(
         name="music",
-        description="Music playback commands.",
+        description="音樂指令",
         allowed_installs=app_commands.AppInstallationType(guild=True, user=False),
     )
 
@@ -223,6 +223,31 @@ class MusicMain:
         except Exception as e:
             logger.error(f"Command_play_playlist Error {e}")
             await itat.followup.send("執行指令時發生錯誤，請稍後再試。", ephemeral=True)
+
+    @music.command(name="list_queue", description="顯示目前播放佇列")
+    @Checkers.is_in_valid_voice_channel()
+    async def command_list_queue(self, itat: Itat):
+        data = db_handler.get({"_id": itat.guild_id})[0]
+        queue = data.get("queue", [])
+        if not queue:
+            await itat.response.send_message("目前播放佇列為空。", ephemeral=True)
+            return
+        else:
+            embed = discord.Embed(
+                color=0xFFCF40,
+                title="目前播放佇列",
+            )
+            description = ""
+            for index, song in enumerate(queue, start=1):
+                title = song.get("title", "Unknown Title")
+                duration = song.get("duration", 0)
+                requester = song.get("requester", "Unknown")
+                description += f"**{index}. {title}** \n {music_utils.format_time(duration)} | 加入者: {requester}\n"
+                if index >= 10:
+                    description += f"...以及其他 {len(queue) - 10} 首歌曲。\n"
+                    break
+            embed.description = description
+            await itat.response.send_message(embed=embed, ephemeral=True)
 
     @music.command(name="stop", description="停止播放音樂")
     @Checkers.is_dj()

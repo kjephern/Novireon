@@ -10,6 +10,7 @@ from discord import VoiceClient as VC
 from pymongo import MongoClient
 
 from mongo_crud import MongoCRUD
+from config import MusicConfig
 from . import music_utils
 from ..youtube import Youtube
 from .music_data import voice_data
@@ -97,7 +98,9 @@ class Functions:
             )
 
             embed = discord.Embed(
-                title=next_song_data["title"], description="播放中...", color=0xADC8FF
+                title=next_song_data["title"],
+                description="播放中...",
+                color=MusicConfig.PLAYING_COLOR,
             )
             embed.set_thumbnail(url=next_song_data.get("thumbnail", ""))
             requester = f'{next_song_data.get("requester", False)}'
@@ -319,7 +322,7 @@ class Functions:
                         except discord.NotFound:
                             break
 
-                await asyncio.sleep(1)
+                await asyncio.sleep(MusicConfig.PLAYABACK_STATE_UPDATER_INTERVAL)
 
                 guild_data = voice_data.get(guild_id)
                 if guild_data:

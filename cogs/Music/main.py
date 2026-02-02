@@ -11,6 +11,7 @@ from discord.ext import commands
 from pymongo import MongoClient
 
 from mongo_crud import MongoCRUD
+from config import MusicConfig
 from .core import music_utils
 from .core.music_checkers import Checkers
 from .core.music_data import voice_data
@@ -121,7 +122,7 @@ class MusicMain:
 
             else:
                 embed = discord.Embed(
-                    color=0x28FF28,
+                    color=MusicConfig.ADD_TO_QUEUE_COLOR,
                     title=f"加入佇列:\n{title}",
                     description=f"by {author}",
                 )
@@ -181,7 +182,9 @@ class MusicMain:
                 return
             selected_songs = random.sample(
                 metadatas,
-                min(max_results, len(metadatas), 25),  # 確保不超過總數或 25
+                min(
+                    max_results, len(metadatas), MusicConfig.MAX_SONGS_ADD_VIA_PLAYLIST
+                ),
             )
             user = itat.user.nick if itat.user.nick else itat.user.name
             for song in selected_songs:
@@ -196,7 +199,7 @@ class MusicMain:
                     author = data.get("author", "Unknown Artist")
 
                     embed = discord.Embed(
-                        color=0x28FF28,
+                        color=MusicConfig.ADD_TO_QUEUE_COLOR,
                         title=f"加入佇列:\n{title}",
                         description=f"by {author}",
                     )
@@ -234,7 +237,7 @@ class MusicMain:
             return
         else:
             embed = discord.Embed(
-                color=0xFFCF40,
+                color=MusicConfig.LIST_QUEUE_COLOR,
                 title="目前播放佇列",
             )
             description = ""
@@ -243,8 +246,8 @@ class MusicMain:
                 duration = song.get("duration", 0)
                 requester = song.get("requester", "Unknown")
                 description += f"**{index}. {title}** \n {music_utils.format_time(duration)} | 加入者: {requester}\n"
-                if index >= 10:
-                    description += f"...以及其他 {len(queue) - 10} 首歌曲。\n"
+                if index >= MusicConfig.MAX_SHOWED_SONGS_IN_LIST_QUEUE:
+                    description += f"...以及其他 {len(queue) - MusicConfig.MAX_SHOWED_SONGS_IN_LIST_QUEUE} 首歌曲。\n"
                     break
             embed.description = description
             await itat.response.send_message(embed=embed, ephemeral=True)

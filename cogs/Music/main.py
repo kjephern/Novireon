@@ -240,16 +240,24 @@ class MusicMain:
                 color=MusicConfig.LIST_QUEUE_COLOR,
                 title="目前播放佇列",
             )
-            description = ""
             for index, song in enumerate(queue, start=1):
+                author = song.get("author", "Unknown Artist")
                 title = song.get("title", "Unknown Title")
                 duration = song.get("duration", 0)
                 requester = song.get("requester", "Unknown")
-                description += f"**{index}. {title}** \n {music_utils.format_time(duration)} | 加入者: {requester}\n"
+                name = f"{index}. {title}"
+                description = f"by {author} | 時長: {music_utils.format_time(duration)} | 由{requester}加入"
+                embed.add_field(
+                    name=name[:256],
+                    value=description[:1024],
+                    inline=False,
+                )
                 if index >= MusicConfig.MAX_SHOWED_SONGS_IN_LIST_QUEUE:
-                    description += f"...以及其他 {len(queue) - MusicConfig.MAX_SHOWED_SONGS_IN_LIST_QUEUE} 首歌曲。\n"
+                    embed.add_field(
+                        name="\u200b",
+                        value=f"...以及其他 {len(queue) - MusicConfig.MAX_SHOWED_SONGS_IN_LIST_QUEUE} 首歌曲。\n",
+                    )
                     break
-            embed.description = description
             await itat.response.send_message(embed=embed, ephemeral=True)
 
     @music.command(name="stop", description="停止播放音樂")

@@ -1,10 +1,8 @@
-import discord
 import logging
 import time
 import urllib.parse
 
 from discord import Interaction as Itat
-from discord.ext import commands
 from discord.utils import get
 from mongo_crud import MongoCRUD
 from pymongo import MongoClient

@@ -57,29 +57,10 @@ class MusicMain:
         try:
             await itat.response.send_message("處理中", ephemeral=True)
 
-            if itat.user.voice is None:
-                await itat.followup.send(
-                    "您必須先加入一個語音頻道才能使用此指令！",
-                    ephemeral=True,
-                    delete_after=5,
-                )
-                return
-
             guild_id = itat.guild_id
-
             if guild_id not in voice_data:
                 voice_data[guild_id] = {}
                 music_utils.return_to_default_music_settings(guild_id)
-
-            elif "client" in voice_data[guild_id]:
-                voice_client: VC = voice_data[guild_id]["client"]
-                if itat.user.voice.channel.id != voice_client.channel.id:
-                    await itat.followup.send(
-                        "您必須先加入與機器人相同語音頻道才能使用此指令！",
-                        ephemeral=True,
-                        delete_after=5,
-                    )
-                    return
 
             voice_data[guild_id]["music_channel"] = itat.channel
             voice_data[guild_id]["itat"] = itat
@@ -158,29 +139,10 @@ class MusicMain:
 
             await itat.response.send_message("處理中", ephemeral=True)
 
-            if itat.user.voice is None:
-                await itat.followup.send(
-                    "您必須先加入一個語音頻道才能使用此指令！",
-                    ephemeral=True,
-                    delete_after=5,
-                )
-                return
-
             guild_id = itat.guild_id
-
             if guild_id not in voice_data:
                 voice_data[guild_id] = {}
                 music_utils.return_to_default_music_settings(guild_id)
-
-            elif "client" in voice_data[guild_id]:
-                voice_client: VC = voice_data[guild_id]["client"]
-                if itat.user.voice.channel.id != voice_client.channel.id:
-                    await itat.followup.send(
-                        "您必須先加入與機器人相同語音頻道才能使用此指令！",
-                        ephemeral=True,
-                        delete_after=5,
-                    )
-                    return
 
             voice_data[guild_id]["music_channel"] = itat.channel
             voice_data[guild_id]["itat"] = itat

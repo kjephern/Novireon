@@ -74,20 +74,14 @@ class MusicMain:
                     data = await Functions.search(itat, request)
                     if data is None:
                         return
-
+            user = itat.user.nick if itat.user.nick else itat.user.name
             if data is None:
                 await itat.followup.send(
                     "找不到相關的音樂，請嘗試其他關鍵字或網址", ephemeral=True
                 )
                 return
             else:
-                data.update(
-                    {
-                        "requester": (
-                            itat.user.nick if itat.user.nick else itat.user.display_name
-                        )
-                    }
-                )
+                data.update({"requester": user})
                 db_handler.append(query={"_id": guild_id}, field="queue", value=data)
 
             title = data.get("title", "Unknown Title")
@@ -102,15 +96,7 @@ class MusicMain:
                 await Functions._play(guild_id)
 
             else:
-                embed = discord.Embed(
-                    color=ADD_TO_QUEUE_COLOR,
-                    title=f"加入佇列:\n{title}",
-                    description=f"by {author}",
-                )
-                embed.add_field(name="時長", value=music_utils.format_time(duration))
-                user = itat.user.nick if itat.user.nick else itat.user.name
-                embed.add_field(name="\u200b", value=f"由{user}加入")
-                embed.set_thumbnail(url=thumbnail)
+                embed = music_utils.create_queue_embed(data)
                 await itat.channel.send(embed=embed)
 
         except Exception as e:
@@ -170,6 +156,7 @@ class MusicMain:
             for song in selected_songs:
                 try:
                     data = await Youtube.get_data_from_single(song["webpage_url"])
+                    data.update({"requester": user})
                     db_handler.append(
                         query={"_id": guild_id}, field="queue", value=data
                     )

@@ -1,12 +1,12 @@
+import discord
 import logging
 import time
 import urllib.parse
 
-from discord import Interaction as Itat
-from discord.utils import get
 from mongo_crud import MongoCRUD
 from pymongo import MongoClient
 
+from config.Music_config import ADD_TO_QUEUE_COLOR
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("music.utils")
@@ -92,3 +92,22 @@ def return_to_default_music_settings(guild_id):
         logger.info("returned to default music settings.")
     except Exception as e:
         logger.critical(f"Can not return to default music settings!")
+
+
+def create_queue_embed(data: dict) -> discord.Embed:
+    title = data.get("title", "Unknown Title")
+    thumbnail = data.get("thumbnail", "")
+    duration = data.get("duration", 0)
+    author = data.get("author", "Unknown Artist")
+    embed = discord.Embed(
+        color=ADD_TO_QUEUE_COLOR,
+        title=f"加入佇列:\n{title}",
+        description=f"by {author}",
+    )
+    embed.add_field(name="時長", value=format_time(duration))
+
+    embed.add_field(
+        name="\u200b", value=f"由{data.get('requester', 'Unknown User')}加入"
+    )
+    embed.set_thumbnail(url=thumbnail)
+    return embed

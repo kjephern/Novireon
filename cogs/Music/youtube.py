@@ -1,10 +1,11 @@
 import asyncio
 import logging
-import random
 import os
 import yt_dlp
 
 from googleapiclient.discovery import build
+
+from config.Music_config import *
 
 YOUTUBE_API_KEY = os.getenv("GOOGLE")
 
@@ -20,7 +21,7 @@ class Youtube:
     @staticmethod
     async def get_playlist_metadata(url: str):
         """
-        從 YouTube URL 提取影片或播放列表的所有元數據，不進行下載。
+        從 YouTube URL 提取影片或播放列表的所有影片連結，不進行下載。
         """
         yt_dl_options = {
             "format": "bestaudio/best",
@@ -31,15 +32,16 @@ class Youtube:
             "playlistend": 50,
         }
 
-        ytdl = yt_dlp.YoutubeDL(yt_dl_options)
-
         try:
-            logger.info(f"正在提取 URL 的元數據: {url}")
-            raw_data = await asyncio.to_thread(
-                ytdl.extract_info,
-                url=url,
-                download=False,
-            )
+
+            def fetch_info():
+                with yt_dlp.YoutubeDL(yt_dl_options) as ydl:
+                    return ydl.extract_info(url, download=False)
+
+            logger.info(f"正在提取 URL 的影片連結: {url}")
+            raw_data = await asyncio.to_thread(fetch_info)
+            if not raw_data:
+                return []
 
             entries = []
             if raw_data.get("_type") == "playlist":
@@ -60,26 +62,8 @@ class Youtube:
             return playlist_metadata
 
         except Exception as e:
-            logger.error(f"提取元數據時發生錯誤: {e}")
+            logger.error(f"提取影片連結時發生錯誤: {e}")
             return None
-
-    @staticmethod
-    async def get_data_from_list(request: str, max_results: int) -> list[dict] | None:
-        playlist_metadata = await Youtube.get_playlist_metadata(request)
-
-        if not playlist_metadata:
-            logger.error("未能獲取播放列表元數據，無法進行下載。")
-            return
-        selected_songs = random.sample(
-            playlist_metadata,
-            min(max_results, len(playlist_metadata), 25),  # 確保不超過總數或 25
-        )
-        video_info = []
-        for song in selected_songs:
-            info = await Youtube.get_data_from_single(song["webpage_url"])
-            if info:
-                video_info.append(info)
-        return video_info
 
     @staticmethod
     async def get_data_from_single(request) -> dict:
@@ -89,10 +73,12 @@ class Youtube:
             "forcenoplaylist": True,
             "ignoreerrors": True,
         }
-        ytdl = yt_dlp.YoutubeDL(yt_dl_options)
-        raw_data = await asyncio.to_thread(
-            ytdl.extract_info, url=request, download=False
-        )
+
+        def fetch_info():
+            with yt_dlp.YoutubeDL(yt_dl_options) as ydl:
+                return ydl.extract_info(request, download=False)
+
+        raw_data = await asyncio.to_thread(fetch_info)
         data = {
             "author": raw_data.get("uploader", "Unknown Artist"),
             "duration": raw_data["duration"],
@@ -104,28 +90,26 @@ class Youtube:
 
     @staticmethod
     async def get_youtube_search_results(
-        search_query: str, max_results: int = 10
+        search_query: str, max_results: int = MAX_YT_SEARCH_RESULTS
     ) -> dict:
-        try:
-            loop = asyncio.get_event_loop()
-            request = youtube.search().list(
-                q=search_query,
-                part="snippet",
-                maxResults=max_results,
-                type="video",
-                relevanceLanguage="zh-TW",
-                regionCode="TW",
-            )
-            response = await loop.run_in_executor(None, request.execute)
+        ydl_opts = {
+            "quiet": True,
+            "extract_flat": True,
+        }
+
+        query = f"ytsearch{max_results}:{search_query}"
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(query, download=False)
 
             results = []
-            for item in response.get("items", []):
-                video_id = item["id"]["videoId"]
-                title = item["snippet"]["title"]
-                author = item["snippet"]["channelTitle"]
-                song_url = youtube_watch_url + video_id
-                results.append([song_url, title, author])
+            if "entries" in info:
+                for entry in info["entries"]:
+                    results.append(
+                        {
+                            "title": entry["title"],
+                            "url": entry["url"],
+                            "author": entry.get("uploader", "Unknown Artist"),
+                        }
+                    )
             return results
-        except Exception as e:
-            logger.error(f"get_youtube_search_results error: {e}")
-            return []

@@ -27,7 +27,7 @@ ffmpeg_options = {
         "-reconnect_delay_max 5 "
         "-probesize 10M "
     ),
-    "options": ("-vn " "-filter:a 'volume=0.3'"),
+    "options": "-vn",
 }
 
 mongo_uri = os.getenv("MONGO_URI")

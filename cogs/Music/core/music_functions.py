@@ -21,8 +21,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("music.functions")
 
 ffmpeg_options = {
-    "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-    "options": '-vn -filter:a "volume=0.3"',
+    "before_options": (
+        "-reconnect 1 "
+        "-reconnect_streamed 1 "
+        "-reconnect_delay_max 5 "
+        "-probesize 10M "
+    ),
+    "options": ("-vn " "-filter:a 'volume=0.3'"),
 }
 
 mongo_uri = os.getenv("MONGO_URI")
@@ -81,10 +86,10 @@ class Functions:
                 voice_client = voice_data[guild_id]["client"]
             await music_channel.send("正在載入...", delete_after=5)
 
-            player = discord.FFmpegOpusAudio(
+            source = await discord.FFmpegOpusAudio.from_probe(
                 next_song_data["song_url"], **ffmpeg_options
             )
-            voice_client.play(player, after=after_play)
+            voice_client.play(source, after=after_play)
 
             db_handler.update_one(
                 query={"_id": guild_id},

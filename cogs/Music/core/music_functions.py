@@ -75,21 +75,27 @@ class Functions:
 
             next_song_data = db_handler.pop(query={"_id": guild_id}, field="queue")
 
-            if (
-                "client" not in voice_data[guild_id]
-                or not voice_data[guild_id]["client"].is_connected()
-            ):
+            try:
                 itat: Itat = voice_data[guild_id]["itat"]
-                voice_client: VC = await itat.user.voice.channel.connect()
-                voice_data[guild_id]["client"] = voice_client
-            else:
-                voice_client = voice_data[guild_id]["client"]
-            await music_channel.send("正在載入...", delete_after=5)
+                if (
+                    "client" not in voice_data[guild_id]
+                    or not voice_data[guild_id]["client"].is_connected()
+                ):
+                    voice_client: VC = await itat.user.voice.channel.connect()
+                    voice_data[guild_id]["client"] = voice_client
+                else:
+                    voice_client = voice_data[guild_id]["client"]
 
-            source = await discord.FFmpegOpusAudio.from_probe(
-                next_song_data["song_url"], **ffmpeg_options
-            )
-            voice_client.play(source, after=after_play)
+                await music_channel.send("正在載入...", delete_after=5)
+                source = await discord.FFmpegOpusAudio.from_probe(
+                    next_song_data["song_url"], **ffmpeg_options
+                )
+                voice_client.play(source, after=after_play)
+
+            except:
+                await itat.followup.send(
+                    "無法播放，請檢查連結或聯絡開發者", delete_after=5
+                )
 
             db_handler.update_one(
                 query={"_id": guild_id},
@@ -241,7 +247,14 @@ class Functions:
                     description=f"by {author or 'Unknown Artist'}"[:100],
                     value=url,
                 )
-                for url, title, author in results
+                for url, title, author in [
+                    (
+                        result["url"],
+                        result["title"],
+                        result["author"],
+                    )
+                    for result in results
+                ]
             ]
             search_menu = discord.ui.Select(
                 placeholder="選擇一首歌", options=video_opt, min_values=1, max_values=1

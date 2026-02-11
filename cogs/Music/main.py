@@ -11,7 +11,6 @@ from discord.ext import commands
 from pymongo import MongoClient
 
 from mongo_crud import MongoCRUD
-from config import MusicConfig
 from .core import music_utils
 from .core.music_checkers import Checkers
 from .core.music_data import voice_data
@@ -19,6 +18,7 @@ from .core.music_functions import Functions
 from .monster_siren import Monster_siren
 from .youtube import Youtube
 
+from config.Music_config import *
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("music.main")
@@ -122,7 +122,7 @@ class MusicMain:
 
             else:
                 embed = discord.Embed(
-                    color=MusicConfig.ADD_TO_QUEUE_COLOR,
+                    color=ADD_TO_QUEUE_COLOR,
                     title=f"加入佇列:\n{title}",
                     description=f"by {author}",
                 )
@@ -138,13 +138,24 @@ class MusicMain:
 
     @music.command(name="play_playlist", description="播放播放列表")
     @app_commands.describe(
-        request="僅可使用youtube網址", max_results="最多加入幾首歌，預設5，最多25"
+        request="僅可使用youtube播放清單網址",
+        max_results=f"最多加入幾首歌，預設{DEFAULT_SONG_COUNT_ADD_VIA_PLAYLIST}，最多{MAX_SONG_COUNT_ADD_VIA_PLAYLIST}首",
+        if_shuffle="是否以隨機順序加入佇列",
     )
     @Checkers.is_in_valid_voice_channel()
     async def command_play_playlist(
-        self, itat: Itat, request: str, max_results: int = 5
+        self,
+        itat: Itat,
+        request: str,
+        max_results: int = DEFAULT_SONG_COUNT_ADD_VIA_PLAYLIST,
+        if_shuffle: bool = True,
     ):
         try:
+            if max_results < 1:
+                max_results = 1
+            elif max_results > MAX_SONG_COUNT_ADD_VIA_PLAYLIST:
+                max_results = MAX_SONG_COUNT_ADD_VIA_PLAYLIST
+
             await itat.response.send_message("處理中", ephemeral=True)
 
             if itat.user.voice is None:
@@ -180,12 +191,19 @@ class MusicMain:
                     "找不到相關的播放列表，請嘗試其他關鍵字或網址", ephemeral=True
                 )
                 return
-            selected_songs = random.sample(
-                metadatas,
-                min(
-                    max_results, len(metadatas), MusicConfig.MAX_SONGS_ADD_VIA_PLAYLIST
-                ),
+            max_songs_count = min(
+                max_results,
+                len(metadatas),
+                MAX_SONG_COUNT_ADD_VIA_PLAYLIST,
             )
+            if if_shuffle:
+                selected_songs = random.sample(
+                    metadatas,
+                    max_songs_count,
+                )
+            else:
+                selected_songs = metadatas[:max_songs_count]
+
             user = itat.user.nick if itat.user.nick else itat.user.name
             for song in selected_songs:
                 try:
@@ -199,7 +217,7 @@ class MusicMain:
                     author = data.get("author", "Unknown Artist")
 
                     embed = discord.Embed(
-                        color=MusicConfig.ADD_TO_QUEUE_COLOR,
+                        color=ADD_TO_QUEUE_COLOR,
                         title=f"加入佇列:\n{title}",
                         description=f"by {author}",
                     )
@@ -237,7 +255,7 @@ class MusicMain:
             return
         else:
             embed = discord.Embed(
-                color=MusicConfig.LIST_QUEUE_COLOR,
+                color=LIST_QUEUE_COLOR,
                 title="目前播放佇列",
             )
             for index, song in enumerate(queue, start=1):
@@ -252,10 +270,10 @@ class MusicMain:
                     value=description[:1024],
                     inline=False,
                 )
-                if index >= MusicConfig.MAX_SHOWED_SONGS_IN_LIST_QUEUE:
+                if index >= MAX_SHOWED_SONGS_IN_LIST_QUEUE:
                     embed.add_field(
                         name="\u200b",
-                        value=f"...以及其他 {len(queue) - MusicConfig.MAX_SHOWED_SONGS_IN_LIST_QUEUE} 首歌曲。\n",
+                        value=f"...以及其他 {len(queue) - MAX_SHOWED_SONGS_IN_LIST_QUEUE} 首歌曲。\n",
                     )
                     break
             await itat.response.send_message(embed=embed, ephemeral=True)

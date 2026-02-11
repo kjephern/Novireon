@@ -84,11 +84,6 @@ class MusicMain:
                 data.update({"requester": user})
                 db_handler.append(query={"_id": guild_id}, field="queue", value=data)
 
-            title = data.get("title", "Unknown Title")
-            thumbnail = data.get("thumbnail", "")
-            duration = data.get("duration", 0)
-            author = data.get("author", "Unknown Artist")
-
             if ("client" not in voice_data[guild_id]) or (
                 not voice_data[guild_id]["client"].is_connected()
             ):
@@ -160,21 +155,7 @@ class MusicMain:
                     db_handler.append(
                         query={"_id": guild_id}, field="queue", value=data
                     )
-                    title = data.get("title", "Unknown Title")
-                    thumbnail = data.get("thumbnail", "")
-                    duration = data.get("duration", 0)
-                    author = data.get("author", "Unknown Artist")
-
-                    embed = discord.Embed(
-                        color=ADD_TO_QUEUE_COLOR,
-                        title=f"加入佇列:\n{title}",
-                        description=f"by {author}",
-                    )
-                    embed.add_field(
-                        name="時長", value=music_utils.format_time(duration)
-                    )
-                    embed.add_field(name="\u200b", value=f"由{user}加入")
-                    embed.set_thumbnail(url=thumbnail)
+                    embed = music_utils.create_queue_embed(data)
                     await itat.channel.send(embed=embed)
                     await asyncio.sleep(1)
                 except Exception as e:

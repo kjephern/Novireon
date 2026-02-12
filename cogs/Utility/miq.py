@@ -8,7 +8,7 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 import requests
 
-from config.global_config import DISCORD_DEFAULT_AVATAR, FONT_PATH, DEFAULT_AVATAR
+from config.global_config import *
 from config.MIQ_config import *
 
 logging.basicConfig(level=logging.INFO)
@@ -203,10 +203,13 @@ def create_quote_image(
         return None
 
     draw = ImageDraw.Draw(base_img)
-    quote_font = ImageFont.truetype(FONT_PATH, QUOTE_FONT_SIZE)
-    author_font = ImageFont.truetype(FONT_PATH, AUTHOR_FONT_SIZE)
-    handle_font = ImageFont.truetype(FONT_PATH, HANDLE_FONT_SIZE)
-    footer_font = ImageFont.truetype(FONT_PATH, FOOTER_FONT_SIZE)
+    try:
+        quote_font = ImageFont.truetype(FONT_PATH, QUOTE_FONT_SIZE)
+        author_font = ImageFont.truetype(FONT_PATH, AUTHOR_FONT_SIZE)
+        handle_font = ImageFont.truetype(FONT_PATH, HANDLE_FONT_SIZE)
+        footer_font = ImageFont.truetype(FONT_PATH, FOOTER_FONT_SIZE)
+    except:
+        logger.error("font error")
 
     text_area_left = CANVAS_WIDTH // 2 + TEXT_MARGIN_WIDTH
     text_area_width = CANVAS_WIDTH - text_area_left - TEXT_MARGIN_WIDTH

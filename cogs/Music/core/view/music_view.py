@@ -49,6 +49,10 @@ class Views:
             await itat.response.send_message(
                 "正在處理請求", ephemeral=True, delete_after=5
             )
+            is_live = self.data["current_playing"].get("is_live", False)
+            if is_live:
+                await itat.followup.send("直播無法暫停", ephemeral=True)
+                return
             if self.is_paused:
                 await Functions._resume(self.guild_id)
             else:

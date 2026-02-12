@@ -30,11 +30,11 @@ def format_time(seconds):
 def generate_progress_bar(guild_id):
     data = db_handler.get(query={"_id": guild_id})[0]
     is_playing = data.get("is_playing")
+    is_live = data["current_playing"].get("is_live", False)
     start_time = data["start_time"]
     duration = data["current_playing"].get("duration", None)
     total_paused_duration = data["total_paused_duration"]
-    author = data.get("author", "Unknown Artist")
-    if duration is None:
+    if is_live:
         return "直播中"
     if total_paused_duration is None:
         total_paused_duration = 0
@@ -77,15 +77,20 @@ def is_valid_url(url):
 
 def return_to_default_music_settings(guild_id):
     try:
+        played = db_handler.get(query={"_id": guild_id})[0].get("played", [])
         db_handler.update_one(
             query={"_id": guild_id},
             new_values={
                 "current_playing": {},
                 "embed_message_id": None,
                 "is_playing": False,
+                "is_live": False,
                 "if_recommend": False,
-                "played": [],
+                "played": played[:-50],
                 "queue": [],
+                "pause_time": None,
+                "start_time": None,
+                "total_paused_duration": 0,
             },
             upsert=True,
         )
@@ -105,7 +110,8 @@ def create_queue_embed(data: dict) -> discord.Embed:
         description=f"by {author}",
     )
     embed.add_field(
-        name="時長", value=format_time(duration) if duration is not None else "直播"
+        name="時長",
+        value="直播" if data.get("is_live", False) else format_time(duration),
     )
 
     embed.add_field(

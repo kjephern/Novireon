@@ -29,7 +29,7 @@ class Views:
     class PauseResumeButton(discord.ui.Button):
         def __init__(self, guild_id: int):
             self.data = db_handler.get(query={"_id": guild_id})[0]
-            self.is_paused = not (self.data.get("is_playing"))
+            self.is_paused = not self.data.get("is_playing")
             # Set style and label based on the current state
             style = ButtonStyle.green if self.is_paused else ButtonStyle.primary
             label = "繼續" if self.is_paused else "暫停"

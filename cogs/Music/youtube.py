@@ -85,6 +85,7 @@ class Youtube:
             "song_url": raw_data["url"],
             "title": raw_data["title"],
             "thumbnail": raw_data.get("thumbnail", ""),
+            "is_live": raw_data.get("is_live", False),
         }
         return data
 
@@ -105,11 +106,14 @@ class Youtube:
             results = []
             if "entries" in info:
                 for entry in info["entries"]:
+                    if entry["live_status"] == "is_live" or entry["duration"] is None:
+                        continue
                     results.append(
                         {
                             "title": entry["title"],
                             "url": entry["url"],
                             "author": entry.get("uploader", "Unknown Artist"),
+                            "duration": entry.get("duration", None),
                         }
                     )
             return results

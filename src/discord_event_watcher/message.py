@@ -22,7 +22,6 @@ class MessageWatcher:
 
     @commands.Cog.listener()
     async def on_raw_message_edit(self, payload: discord.RawMessageUpdateEvent):
-        print(payload.data)
         before = payload.cached_message or None
         after = payload.message or None
         if after is None or after.author.bot:

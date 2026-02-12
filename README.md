@@ -89,3 +89,9 @@ All commands are implemented as slash commands for easy use.
 
 *   `/ping`: Shows an embed with detailed real-time status of the bot and its host server.
 *   `/make_it_a_quote <quote_context> [author_member] [author_text] [custom_avatar]`: Generates a quote image. You can specify the author by tagging a member or providing text, and optionally upload a custom avatar.
+
+## Credits
+
+### Fonts
+
+* gensen-font - Licensed under SIL Open Font License 1.1. (Copyright © 2020 ButTaiwan)

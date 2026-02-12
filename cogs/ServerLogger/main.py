@@ -31,9 +31,7 @@ class ServerLoggerMain:
         self.bot: commands.Bot = bot
 
     async def message_event(self, before: Message, after: Message, event_type: str):
-        if before:
-            message = before
-        elif after:
+        if after:
             message = after
         else:
             return

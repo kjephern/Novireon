@@ -22,11 +22,12 @@ class MessageWatcher:
 
     @commands.Cog.listener()
     async def on_raw_message_edit(self, payload: discord.RawMessageUpdateEvent):
+        print(payload.data)
         before = payload.cached_message or None
-        after = payload.message
-        if not after or after.author.bot:
+        after = payload.message or None
+        if after is None or after.author.bot:
             return
-        if before.content == after.content:
+        if before is None or before.content == after.content:
             return
         server_logger_cog = self.bot.get_cog("ServerLogger")
         await server_logger_cog.message_event(

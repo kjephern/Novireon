@@ -81,7 +81,7 @@ class Youtube:
         raw_data = await asyncio.to_thread(fetch_info)
         data = {
             "author": raw_data.get("uploader", "Unknown Artist"),
-            "duration": raw_data["duration"],
+            "duration": raw_data.get("duration", None),
             "song_url": raw_data["url"],
             "title": raw_data["title"],
             "thumbnail": raw_data.get("thumbnail", ""),

@@ -31,11 +31,11 @@ def generate_progress_bar(guild_id):
     data = db_handler.get(query={"_id": guild_id})[0]
     is_playing = data.get("is_playing")
     start_time = data["start_time"]
-    duration = data["current_playing"]["duration"]
+    duration = data["current_playing"].get("duration", None)
     total_paused_duration = data["total_paused_duration"]
     author = data.get("author", "Unknown Artist")
-    if duration == 0:
-        return ""
+    if duration is None:
+        return "直播中"
     if total_paused_duration is None:
         total_paused_duration = 0
 
@@ -97,14 +97,16 @@ def return_to_default_music_settings(guild_id):
 def create_queue_embed(data: dict) -> discord.Embed:
     title = data.get("title", "Unknown Title")
     thumbnail = data.get("thumbnail", "")
-    duration = data.get("duration", 0)
+    duration = data.get("duration", None)
     author = data.get("author", "Unknown Artist")
     embed = discord.Embed(
         color=ADD_TO_QUEUE_COLOR,
         title=f"加入佇列:\n{title}",
         description=f"by {author}",
     )
-    embed.add_field(name="時長", value=format_time(duration))
+    embed.add_field(
+        name="時長", value=format_time(duration) if duration is not None else "直播"
+    )
 
     embed.add_field(
         name="\u200b", value=f"由{data.get('requester', 'Unknown User')}加入"

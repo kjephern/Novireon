@@ -191,10 +191,14 @@ class MusicMain:
             for index, song in enumerate(queue, start=1):
                 author = song.get("author", "Unknown Artist")
                 title = song.get("title", "Unknown Title")
-                duration = song.get("duration", 0)
+                duration = song.get("duration", None)
                 requester = song.get("requester", "Unknown")
                 name = f"{index}. {title}"
-                description = f"by {author} | 時長: {music_utils.format_time(duration)} | 由{requester}加入"
+                description = (
+                    f"by {author} | 時長: {music_utils.format_time(duration)} | 由{requester}加入"
+                    if duration is not None
+                    else f"by {author} | 直播 | 由{requester}加入"
+                )
                 embed.add_field(
                     name=name[:256],
                     value=description[:1024],

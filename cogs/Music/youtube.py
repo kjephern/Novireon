@@ -79,8 +79,8 @@ class Youtube:
                 return ydl.extract_info(request, download=False)
 
         raw_data = await asyncio.to_thread(fetch_info)
-        if "DVR" in raw_data.get("url"):
-            raise ValueError("不可回放直播影片不支援播放")
+        # if "DVR" in raw_data.get("url"):
+        #     raise ValueError("不可回放直播影片不支援播放")
         data = {
             "author": raw_data.get("uploader", "Unknown Artist"),
             "duration": raw_data.get("duration", None),

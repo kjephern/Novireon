@@ -1,6 +1,7 @@
 import asyncio
 import discord
 import logging
+import random
 import time
 import os
 
@@ -56,6 +57,105 @@ class Functions:
                 await music_channel.send("音樂已暫停", delete_after=5)
         except Exception as e:
             logger.error(f"pause command error: {e}")
+
+    async def pre_play(itat: Itat, request):
+        guild_id = itat.guild_id
+        if guild_id not in voice_data:
+            voice_data[guild_id] = {}
+            music_utils.return_to_default_music_settings(guild_id)
+
+        voice_data[guild_id]["music_channel"] = itat.channel
+        voice_data[guild_id]["itat"] = itat
+
+        match music_utils.get_source_name(request):
+            case "youtube":
+                try:
+                    data = await Youtube.get_data_from_single(request)
+                except ValueError as e:
+                    await itat.followup.send(str(e), ephemeral=True)
+                    return
+            case "direct_audio":
+                pass
+            case "":
+                data = await Functions.search(itat, request)
+                if data is None:
+                    return
+        user = itat.user.nick if itat.user.nick else itat.user.name
+        if data is None:
+            await itat.followup.send(
+                "找不到相關的音樂，請嘗試其他關鍵字或網址", ephemeral=True
+            )
+            return
+        else:
+            data.update({"requester": user})
+            db_handler.append(query={"_id": guild_id}, field="queue", value=data)
+
+        if ("client" not in voice_data[guild_id]) or (
+            not voice_data[guild_id]["client"].is_connected()
+        ):
+            await itat.followup.send("正在處理播放請求", ephemeral=True)
+            await Functions._play(guild_id)
+
+        else:
+            embed = music_utils.create_queue_embed(data)
+            await itat.channel.send(embed=embed)
+
+    async def pre_play_playlist(itat: Itat, request, max_results, if_shuffle):
+        if max_results < 1:
+            max_results = 1
+        elif max_results > MAX_SONG_COUNT_ADD_VIA_PLAYLIST:
+            max_results = MAX_SONG_COUNT_ADD_VIA_PLAYLIST
+
+        await itat.response.send_message("處理中", ephemeral=True)
+
+        guild_id = itat.guild_id
+        if guild_id not in voice_data:
+            voice_data[guild_id] = {}
+            music_utils.return_to_default_music_settings(guild_id)
+
+        voice_data[guild_id]["music_channel"] = itat.channel
+        voice_data[guild_id]["itat"] = itat
+
+        metadatas = await Youtube.get_playlist_metadata(request)
+        if metadatas is None:
+            await itat.followup.send(
+                "找不到相關的播放列表，請嘗試其他關鍵字或網址", ephemeral=True
+            )
+            return
+        max_songs_count = min(
+            max_results,
+            len(metadatas),
+            MAX_SONG_COUNT_ADD_VIA_PLAYLIST,
+        )
+        if if_shuffle:
+            selected_songs = random.sample(
+                metadatas,
+                max_songs_count,
+            )
+        else:
+            selected_songs = metadatas[:max_songs_count]
+
+        user = itat.user.nick if itat.user.nick else itat.user.name
+        for song in selected_songs:
+            try:
+                data = await Youtube.get_data_from_single(song["webpage_url"])
+                data.update({"requester": user})
+                db_handler.append(query={"_id": guild_id}, field="queue", value=data)
+                embed = music_utils.create_queue_embed(data)
+                await itat.channel.send(embed=embed)
+                await asyncio.sleep(1)
+            except Exception as e:
+                await itat.channel.send(
+                    "加入播放列表時發生錯誤，部分歌曲可能未加入佇列。"
+                )
+                logger.error(f"Error adding song from playlist: {e}")
+                continue
+
+        if ("client" not in voice_data[guild_id]) or (
+            not voice_data[guild_id]["client"].is_connected()
+        ):
+            await itat.followup.send("正在處理播放請求", ephemeral=True)
+            await Functions._play(guild_id)
 
     async def _play(guild_id):
         try:

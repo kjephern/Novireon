@@ -194,7 +194,7 @@ class Functions:
 
             except:
                 await itat.followup.send(
-                    "無法播放，請檢查連結或聯絡開發者", delete_after=5
+                    "無法播放，請檢查連結或聯絡開發者", ephemeral=True
                 )
 
             db_handler.update_one(

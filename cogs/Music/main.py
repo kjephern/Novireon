@@ -15,8 +15,6 @@ from .core import music_utils
 from .core.music_checkers import Checkers
 from .core.music_data import voice_data
 from .core.music_functions import Functions
-from .monster_siren import Monster_siren
-from .youtube import Youtube
 
 from config.Music_config import *
 

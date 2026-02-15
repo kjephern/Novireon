@@ -67,7 +67,11 @@ class MusicMain:
 
             match music_utils.get_source_name(request):
                 case "youtube":
-                    data = await Youtube.get_data_from_single(request)
+                    try:
+                        data = await Youtube.get_data_from_single(request)
+                    except ValueError as e:
+                        await itat.followup.send(str(e), ephemeral=True)
+                        return
                 case "monster_siren":
                     import asyncio
 

@@ -68,6 +68,7 @@ def image_handler(input_path: str):
         None: 發生任何錯誤時回傳 None。
     """
     try:
+        input_path = str(input_path)
         if input_path.startswith(("http://", "https://")):
             logger.info(f"正在從 URL 下載圖片: {input_path}")
             response = requests.get(input_path, stream=True)

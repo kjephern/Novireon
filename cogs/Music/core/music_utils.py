@@ -1,5 +1,6 @@
 import discord
 import logging
+import re
 import time
 import urllib.parse
 
@@ -55,15 +56,31 @@ def generate_progress_bar(guild_id):
         return f"已暫停\n`[{bar}]` `({format_time(elapsed)}/{format_time(duration)})`"
 
 
-def get_source_name(url):
+def get_source_name(url: str):
     if not isinstance(url, str):
         return ""
-    hostname = urllib.parse.urlparse(url).hostname
-    if hostname:
-        if "youtube.com" in hostname or "youtu.be" in hostname:
-            return "youtube"
-        if "monster-siren.hypergryph.com" in hostname:
-            return "monster_siren"
+
+    parsed = urllib.parse.urlparse(url)
+    hostname = parsed.hostname
+
+    if not hostname:
+        return ""
+
+    hostname = hostname.lower()
+
+    rules = {
+        "youtube": ("youtube.com", "youtu.be"),
+        "monster_siren": ("monster-siren.hypergryph.com",),
+    }
+
+    for source_name, domains in rules.items():
+        if hostname.endswith(domains):
+            return source_name
+    audio_extensions = [".mp3", ".wav", ".ogg", ".flac", ".aac", ".m4a"]
+    pattern = "|".join(map(re.escape, audio_extensions))
+
+    if re.search(pattern, url):
+        return "direct_audio"
     return ""
 
 

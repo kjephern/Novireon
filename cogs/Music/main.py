@@ -69,7 +69,12 @@ class MusicMain:
                 case "youtube":
                     data = await Youtube.get_data_from_single(request)
                 case "monster_siren":
-                    data = Monster_siren.get_song_data(request)
+                    import asyncio
+
+                    loop = asyncio.get_running_loop()
+                    data = await loop.run_in_executor(
+                        None, Monster_siren.get_song_data, request
+                    )
                 case "":
                     data = await Functions.search(itat, request)
                     if data is None:

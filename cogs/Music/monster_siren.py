@@ -54,7 +54,6 @@ class Monster_siren:
         except (KeyError, json.JSONDecodeError):
             logger.error("解析 API 回應失敗，可能是無效的 URL 或 API 結構已變更。")
         except Exception as e:
-            # 使用 exc_info=True 可以自動附上完整的錯誤追蹤訊息，非常適合除錯
             logger.error(f"發生非預期錯誤: {e}", exc_info=True)
         return None
 
@@ -70,7 +69,6 @@ def calculate_duration_from_audio_url(audio_url: str, timeout=15):
     path = urlparse(audio_url).path
     file_extension = os.path.splitext(path)[1].strip(".").lower()
 
-    # --- 策略一：針對 WAV 檔案的超高效路徑 ---
     if file_extension == "wav":
         try:
             logger.info("偵測到 WAV 檔案，嘗試部份下載模式...")
@@ -111,8 +109,6 @@ def calculate_duration_from_audio_url(audio_url: str, timeout=15):
             logger.warning(
                 f"部份下載失敗 ({type(e).__name__}: {e})，將降級為完整下載。"
             )
-
-    # --- 策略二：針對 MP3 或其他格式，以及失敗的 WAV 的可靠路徑 ---
     try:
         logger.info("執行標準模式 (完整下載)...")
         full_response = requests.get(audio_url, timeout=timeout * 2)

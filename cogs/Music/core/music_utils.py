@@ -1,6 +1,8 @@
+import asyncio
 import discord
 import logging
 import re
+import subprocess
 import time
 import urllib.parse
 
@@ -82,6 +84,46 @@ def get_source_name(url: str):
     if re.search(pattern, url):
         return "direct_audio"
     return ""
+
+
+async def get_web_audio_duration(url: str):
+    """
+    獲取網路音訊檔案的時長 (秒)，支援 mp3, wav, ogg, flac, aac, m4a 等。
+    使用 ffprobe 進行分析，無需完整下載。
+    """
+    FFPROBE_PATH = "ffprobe"
+    args = [
+        FFPROBE_PATH,
+        "-v",
+        "error",
+        "-show_entries",
+        "format=duration",
+        "-of",
+        "default=noprint_wrappers=1:nokey=1",
+        "-i",
+        url,
+    ]
+
+    try:
+        process = await asyncio.create_subprocess_exec(
+            *args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+
+        stdout, stderr = await process.communicate()
+
+        if process.returncode != 0:
+            logging.error(f"FFprobe error: {stderr.decode('utf-8')}")
+            return 0
+
+        duration_str = stdout.decode("utf-8").strip()
+        if not duration_str:
+            return 0
+
+        return round(float(duration_str))
+
+    except Exception as e:
+        logging.error(f"Error getting duration: {e}")
+        return 0
 
 
 def is_valid_url(url):

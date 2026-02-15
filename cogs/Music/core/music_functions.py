@@ -15,6 +15,7 @@ from . import music_utils
 from .music_data import voice_data
 from .view.control_views import ControlView
 from ..youtube import Youtube
+from ..monster_siren import Monster_siren
 
 from config.Music_config import *
 
@@ -23,12 +24,22 @@ logger = logging.getLogger("music.functions")
 
 ffmpeg_options = {
     "before_options": (
-        "-reconnect 1 "
-        "-reconnect_streamed 1 "
-        "-reconnect_delay_max 5 "
+        "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 "
         "-probesize 10M "
+        "-analyzeduration 10M "
+        "-fflags +genpts+igndts "
     ),
-    "options": "-vn",
+    "options": (
+        "-vn "
+        "-threads auto "
+        '-af "volume=1.0" '
+        "-acodec libopus "
+        "-b:a 128k "
+        "-ar 48000 "
+        "-ac 2 "
+        "-application audio "
+        "-frame_duration 20 "
+    ),
 }
 
 mongo_uri = os.getenv("MONGO_URI")
@@ -74,8 +85,20 @@ class Functions:
                 except ValueError as e:
                     await itat.followup.send(str(e), ephemeral=True)
                     return
+            case "monster_siren":
+                data = Monster_siren.get_song_data(request)
             case "direct_audio":
-                pass
+                duration = await music_utils.get_web_audio_duration(request)
+                avatar = (
+                    itat.user.display_avatar.url if itat.user.display_avatar else None
+                )
+                data = {
+                    "author": "Unknown Artist",
+                    "title": "Unknown Title",
+                    "song_url": request,
+                    "duration": duration,
+                    "thumbnail": avatar,
+                }
             case "":
                 data = await Functions.search(itat, request)
                 if data is None:
@@ -187,12 +210,16 @@ class Functions:
                     voice_client = voice_data[guild_id]["client"]
 
                 await music_channel.send("正在載入...", delete_after=5)
-                source = await discord.FFmpegOpusAudio.from_probe(
-                    next_song_data["song_url"], **ffmpeg_options
-                )
+                try:
+                    source = discord.FFmpegOpusAudio(
+                        next_song_data["song_url"], **ffmpeg_options
+                    )
+                except Exception as e:
+                    logger.error(e)
                 voice_client.play(source, after=after_play)
 
-            except:
+            except Exception as e:
+                logger.error(f"Error during playback: {e}")
                 await itat.followup.send(
                     "無法播放，請檢查連結或聯絡開發者", ephemeral=True
                 )

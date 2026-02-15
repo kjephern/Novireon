@@ -286,12 +286,7 @@ class Functions:
         client: VC = voice_data[guild_id]["client"]
 
         if client.is_connected():
-            MongoCRUD.update_one(
-                db_handler,
-                query={"_id": guild_id},
-                new_values={"queue": [], "is_playing": False, "current_playing": None},
-                upsert=True,
-            )
+            music_utils.return_to_default_music_settings(guild_id)
             await client.disconnect(force=True)
         await asyncio.sleep(1)
         if guild_id in voice_data:
@@ -301,20 +296,18 @@ class Functions:
     async def play_next(guild_id):
         try:
             data = db_handler.get(query={"_id": guild_id})[0]
+            current_playing = data.get("current_playing", None)
             embed_msg: discord.Message = voice_data[guild_id]["state_embed_message"]
             embed = embed_msg.embeds.pop()
             embed.description = "播放完畢"
             await embed_msg.edit(embed=embed, view=None)
-            if (
-                db_handler.get(query={"_id": guild_id})[0].get("current_playing")
-                is None
-            ):
+            if current_playing is None:
                 return
             queue = data.get("queue", None)
             db_handler.append(
                 query={"_id": guild_id},
                 field="played",
-                value=data.get("current_playing"),
+                value=current_playing,
             )
             if len(queue) > 0:
                 await Functions._play(guild_id)

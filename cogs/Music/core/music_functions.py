@@ -213,7 +213,9 @@ class Functions:
                 description="播放中...",
                 color=PLAYING_COLOR,
             )
-            embed.set_thumbnail(url=next_song_data.get("thumbnail", ""))
+            thumbnail = next_song_data.get("thumbnail", None)
+            if thumbnail:
+                embed.set_thumbnail(url=thumbnail)
             requester = f'{next_song_data.get("requester", False)}'
             if requester:
                 embed.add_field(name="\u200b", value=f"由{requester}加入")

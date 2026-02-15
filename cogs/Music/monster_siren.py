@@ -46,7 +46,7 @@ class Monster_siren:
                 "author": ", ".join(raw_song_data.get("artists", ["N/A"])),
                 "duration": calculated_duration,
                 "song_url": audio_url,
-                "thumbnail": raw_album_data.get("coverUrl", ""),
+                "thumbnail": raw_album_data.get("coverUrl", None),
             }
             return data
         except requests.exceptions.RequestException as e:

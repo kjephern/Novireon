@@ -118,7 +118,7 @@ def return_to_default_music_settings(guild_id):
 
 def create_queue_embed(data: dict) -> discord.Embed:
     title = data.get("title", "Unknown Title")
-    thumbnail = data.get("thumbnail", "")
+    thumbnail = data.get("thumbnail", None)
     duration = data.get("duration", None)
     author = data.get("author", "Unknown Artist")
     embed = discord.Embed(
@@ -134,5 +134,6 @@ def create_queue_embed(data: dict) -> discord.Embed:
     embed.add_field(
         name="\u200b", value=f"由{data.get('requester', 'Unknown User')}加入"
     )
-    embed.set_thumbnail(url=thumbnail)
+    if thumbnail:
+        embed.set_thumbnail(url=thumbnail)
     return embed

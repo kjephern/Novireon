@@ -29,7 +29,7 @@ class MongoCRUD:
         self.db = self.client[db_name]
         self.collection = self.db[collection_name]
         self.logger = logger
-        self.logger.info(f"Handler for collection '{collection_name}' initialized.")
+        self.logger.debug(f"Handler for collection '{collection_name}' initialized.")
 
     def get(self, query: dict):
         """根據查詢條件獲取文件。"""
@@ -52,7 +52,7 @@ class MongoCRUD:
         try:
             result = self.collection.update_many(query, {"$set": new_values})
             if result.matched_count > 0:
-                self.logger.info(
+                self.logger.debug(
                     f"Matched {result.matched_count} and modified {result.modified_count} document(s)."
                 )
             else:
@@ -84,9 +84,11 @@ class MongoCRUD:
             )
 
             if result.upserted_id:
-                self.logger.info(f"Upserted new document with ID: {result.upserted_id}")
+                self.logger.debug(
+                    f"Upserted new document with ID: {result.upserted_id}"
+                )
             elif result.matched_count > 0:
-                self.logger.info(
+                self.logger.debug(
                     f"Matched {result.matched_count} and modified {result.modified_count} document(s)."
                 )
             else:
@@ -108,7 +110,7 @@ class MongoCRUD:
         try:
             result = self.collection.update_one(query, {"$push": {field: value}})
             if result.matched_count > 0:
-                self.logger.info(
+                self.logger.debug(
                     f"Successfully appended value to field '{field}' for a matched document."
                 )
             else:
@@ -165,7 +167,7 @@ class MongoCRUD:
                 array_before_pop[0] if direction == -1 else array_before_pop[-1]
             )
 
-            self.logger.info(f"Successfully popped element from field '{field}'.")
+            self.logger.debug(f"Successfully popped element from field '{field}'.")
             return popped_element
 
         except PyMongoError as e:

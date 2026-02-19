@@ -106,10 +106,10 @@ class PlayerMain:
                     value=description[:1024],
                     inline=False,
                 )
-                if index >= player_config["limits.max_dispaly_song_count_in_list_queue"]:
+                if index >= player_config["limits.max_display_song_count_in_list_queue"]:
                     embed.add_field(
                         name="\u200b",
-                        value=f"...以及其他 {len(queue) - player_config["limits.max_dispaly_song_count_in_list_queue"]} 首歌曲。\n",
+                        value=f"...以及其他 {len(queue) - player_config["limits.max_display_song_count_in_list_queue"]} 首歌曲。\n",
                     )
                     break
             await itat.response.send_message(embed=embed, ephemeral=True)

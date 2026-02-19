@@ -5,7 +5,7 @@ update_interval = 5  # 秒
 [limits]
 max_song_count_add_via_playlist = 20
 default_song_count_add_via_playlist = 5  # 建議 = 5
-max_dispaly_song_count_in_list_queue = 20
+max_display_song_count_in_list_queue = 20
 max_yt_search_results = 10
 
 [colors]

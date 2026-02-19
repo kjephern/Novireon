@@ -135,7 +135,11 @@ def is_valid_url(url):
 
 def return_to_default_player_settings(guild_id):
     try:
-        played = db_handler.get(query={"_id": guild_id})[0].get("played", [])
+        data = db_handler.get(query={"_id": guild_id})
+        if data:
+            played = data[0].get("played", [])
+        else:
+            played = []
         db_handler.update_many(
             query={"_id": guild_id},
             new_values={

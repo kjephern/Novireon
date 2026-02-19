@@ -138,7 +138,7 @@ def is_valid_url(url):
 def return_to_default_music_settings(guild_id):
     try:
         played = db_handler.get(query={"_id": guild_id})[0].get("played", [])
-        db_handler.update_one(
+        db_handler.update_many(
             query={"_id": guild_id},
             new_values={
                 "current_playing": {},

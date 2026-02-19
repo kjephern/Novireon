@@ -87,7 +87,7 @@ class Functions:
                     await itat.followup.send(str(e), ephemeral=True)
                     return
             case "monster_siren":
-                data = Monster_siren.get_song_data(request)
+                data = await Monster_siren.get_song_data(request)
             case "direct_audio":
                 duration = await player_utils.get_web_audio_duration(request)
                 avatar = itat.user.display_avatar.url if itat.user.display_avatar else None

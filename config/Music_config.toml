@@ -1,0 +1,14 @@
+[playback]
+[playback.state]
+update_interval = 5  # 秒
+
+[limits]
+max_song_count_add_via_playlist = 20
+default_song_count_add_via_playlist = 5  # 建議 = 5
+max_dispaly_song_count_in_list_queue = 20
+max_yt_search_results = 10
+
+[colors]
+add_to_queue = 0x28FF28
+list_queue = 0xFFCF40
+playing = 0xADC8FF

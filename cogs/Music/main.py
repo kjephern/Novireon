@@ -12,10 +12,11 @@ from .core import music_utils
 from .core.music_checkers import Checkers
 from .core.music_functions import Functions
 
-from config.Music_config import *
+from src.util.config import get_config
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("music.main")
+music_config = get_config("Music")
 
 ffmpeg_options = {
     "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
@@ -58,7 +59,7 @@ class MusicMain:
     @music.command(name="play_playlist", description="播放播放列表")
     @app_commands.describe(
         request="僅可使用youtube播放清單網址",
-        max_results=f"最多加入幾首歌，預設{DEFAULT_SONG_COUNT_ADD_VIA_PLAYLIST}，最多{MAX_SONG_COUNT_ADD_VIA_PLAYLIST}首",
+        max_results=f"最多加入幾首歌，預設{music_config["limits.default_song_count_add_via_playlist"]}，最多{music_config["limits.max_song_count_add_via_playlist"]}首",
         if_shuffle="是否以隨機順序加入佇列",
     )
     @Checkers.is_in_valid_voice_channel()
@@ -66,7 +67,7 @@ class MusicMain:
         self,
         itat: Itat,
         request: str,
-        max_results: int = DEFAULT_SONG_COUNT_ADD_VIA_PLAYLIST,
+        max_results: int = music_config["limits.default_song_count_add_via_playlist"],
         if_shuffle: bool = True,
     ):
         try:
@@ -86,7 +87,7 @@ class MusicMain:
             return
         else:
             embed = discord.Embed(
-                color=LIST_QUEUE_COLOR,
+                color=music_config["colors.add_to_queue"],
                 title="目前播放佇列",
             )
             for index, song in enumerate(queue, start=1):
@@ -105,10 +106,10 @@ class MusicMain:
                     value=description[:1024],
                     inline=False,
                 )
-                if index >= MAX_SHOWED_SONGS_IN_LIST_QUEUE:
+                if index >= music_config["limits.max_dispaly_song_count_in_list_queue"]:
                     embed.add_field(
                         name="\u200b",
-                        value=f"...以及其他 {len(queue) - MAX_SHOWED_SONGS_IN_LIST_QUEUE} 首歌曲。\n",
+                        value=f"...以及其他 {len(queue) - music_config["limits.max_dispaly_song_count_in_list_queue"]} 首歌曲。\n",
                     )
                     break
             await itat.response.send_message(embed=embed, ephemeral=True)

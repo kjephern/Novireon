@@ -9,10 +9,11 @@ import urllib.parse
 from mongo_crud import MongoCRUD
 from pymongo import MongoClient
 
-from config.Music_config import ADD_TO_QUEUE_COLOR
+from src.util.config import get_config
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("music.utils")
+music_config = get_config("Music")
 
 mongo_client = MongoClient("mongodb://localhost:27017/", serverSelectionTimeoutMS=15000)
 
@@ -164,7 +165,7 @@ def create_queue_embed(data: dict) -> discord.Embed:
     duration = data.get("duration", None)
     author = data.get("author", "Unknown Artist")
     embed = discord.Embed(
-        color=ADD_TO_QUEUE_COLOR,
+        color=music_config["colors.add_to_queue"],
         title=f"加入佇列:\n{title}",
         description=f"by {author}",
     )

@@ -1,0 +1,28 @@
+[canvas]
+width = 1920
+height = 1080
+text_margin = 75
+
+
+[colors]
+text = [255, 255, 255]          # 引言文字顏色
+author = [200, 200, 200]        # 作者文字顏色
+footer = [150, 150, 150]        # 底部標記顏色
+left_bg = [26, 26, 26, 255]     # 左側背景顏色 RGBA
+right_bg = [26, 26, 26, 255]    # 右側背景顏色 RGBA
+
+# 蒙板設定
+[vignette]
+# CANVAS_WIDTH * 0 = 0, CANVAS_HEIGHT * 0.5 = 540
+center_x = 0
+center_y = 540
+radius_pixels = 900             # 蒙板大小
+gradient_start_ratio = 0.7      # 蒙板漸變起始處 (0 ~ 1)
+
+# 字體大小設定
+[fonts]
+[fonts.sizes]
+quote = 72
+author_name = 45
+author_id = 30
+footer = 21

@@ -17,10 +17,11 @@ from .view.control_views import ControlView
 from ..youtube import Youtube
 from ..monster_siren import Monster_siren
 
-from config.Music_config import *
+from src.util.config import get_config
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("music.functions")
+music_config = get_config("Music")
 
 ffmpeg_options = {
     "before_options": (
@@ -126,8 +127,8 @@ class Functions:
     async def pre_play_playlist(itat: Itat, request, max_results, if_shuffle):
         if max_results < 1:
             max_results = 1
-        elif max_results > MAX_SONG_COUNT_ADD_VIA_PLAYLIST:
-            max_results = MAX_SONG_COUNT_ADD_VIA_PLAYLIST
+        elif max_results > music_config["limits.max_song_count_add_via_playlist"]:
+            max_results = music_config["limits.max_song_count_add_via_playlist"]
 
         await itat.response.send_message("處理中", ephemeral=True)
 
@@ -148,7 +149,7 @@ class Functions:
         max_songs_count = min(
             max_results,
             len(metadatas),
-            MAX_SONG_COUNT_ADD_VIA_PLAYLIST,
+            music_config["limits.max_song_count_add_via_playlist"],
         )
         if if_shuffle:
             selected_songs = random.sample(
@@ -238,7 +239,7 @@ class Functions:
             embed = discord.Embed(
                 title=next_song_data["title"],
                 description="播放中...",
-                color=PLAYING_COLOR,
+                color=music_config["colors.playing"],
             )
             thumbnail = next_song_data.get("thumbnail", None)
             if thumbnail:
@@ -462,7 +463,7 @@ class Functions:
                         except discord.NotFound:
                             break
 
-                await asyncio.sleep(PLAYABACK_STATE_UPDATER_INTERVAL)
+                await asyncio.sleep(music_config["playback.state.update_interval"])
 
                 guild_data = voice_data.get(guild_id)
                 if guild_data:

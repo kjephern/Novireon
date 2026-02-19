@@ -9,15 +9,14 @@ from PIL import Image, ImageDraw, ImageFont
 import requests
 
 from config.global_config import *
-from config.MIQ_config import *
+from src.util.config import get_config
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("MIQ")
+miq_config = get_config("MIQ")
 
 
-def create_black_mask(
-    width: int, height: int, center: tuple, max_radius: int, gradient_start_ratio: float
-):
+def create_black_mask(width: int, height: int, center: tuple, max_radius: int, gradient_start_ratio: float):
     """
     Args:
         width (int): 蒙版寬度。
@@ -50,7 +49,7 @@ def create_black_mask(
         y1_clear = center_y + gradient_start_radius
         draw.ellipse([x0_clear, y0_clear, x1_clear, y1_clear], fill=0)
 
-    base_image = Image.new("RGBA", (width, height), RIGHT_BG_COLOR)
+    base_image = Image.new("RGBA", (width, height), tuple(miq_config["colors.left_bg"]))
     base_image.putalpha(alpha_mask)
 
     return base_image
@@ -131,7 +130,7 @@ def create_composite_image(
         return
 
     canvas_width, canvas_height = canvas_size
-    background_canvas = Image.new("RGBA", canvas_size, LEFT_BG_COLOR)
+    background_canvas = Image.new("RGBA", canvas_size, tuple(miq_config["colors.left_bg"]))
 
     orig_w, orig_h = user_image.size
     crop_size = min(orig_w, orig_h)
@@ -191,13 +190,16 @@ def create_quote_image(
         Any: 成功時無回傳值（即隱式回傳 None），僅將圖片儲存至指定路徑。
     """
     mask_settings = {
-        "center": (int(VIGNETTE_MASK_CENTER_X), int(VIGNETTE_MASK_CENTER_Y)),
-        "radius": VIGNETTE_MASK_RADIUS_PIXELS,
-        "start_ratio": VIGNETTE_GRADIENT_START_RATIO,
+        "center": (
+            int(miq_config["vignette.center_x"]),
+            int(miq_config["vignette.center_y"]),
+        ),
+        "radius": miq_config["vignette.radius_pixels"],
+        "start_ratio": miq_config["vignette.gradient_start_ratio"],
     }
     base_img = create_composite_image(
         input_path=custom_image_path,
-        canvas_size=(CANVAS_WIDTH, CANVAS_HEIGHT),
+        canvas_size=(miq_config["canvas.width"], miq_config["canvas.height"]),
         vignette_mask_info=mask_settings,
     )
     if base_img is None:
@@ -205,15 +207,15 @@ def create_quote_image(
 
     draw = ImageDraw.Draw(base_img)
     try:
-        quote_font = ImageFont.truetype(FONT_PATH, QUOTE_FONT_SIZE)
-        author_font = ImageFont.truetype(FONT_PATH, AUTHOR_FONT_SIZE)
-        handle_font = ImageFont.truetype(FONT_PATH, HANDLE_FONT_SIZE)
-        footer_font = ImageFont.truetype(FONT_PATH, FOOTER_FONT_SIZE)
+        quote_font = ImageFont.truetype(FONT_PATH, miq_config["fonts.sizes.quote"])
+        author_font = ImageFont.truetype(FONT_PATH, miq_config["fonts.sizes.author_name"])
+        handle_font = ImageFont.truetype(FONT_PATH, miq_config["fonts.sizes.author_id"])
+        footer_font = ImageFont.truetype(FONT_PATH, miq_config["fonts.sizes.footer"])
     except:
         logger.error("font error")
 
-    text_area_left = CANVAS_WIDTH // 2 + TEXT_MARGIN_WIDTH
-    text_area_width = CANVAS_WIDTH - text_area_left - TEXT_MARGIN_WIDTH
+    text_area_left = miq_config["canvas.width"] // 2 + miq_config["canvas.text_margin"]
+    text_area_width = miq_config["canvas.width"] - text_area_left - miq_config["canvas.text_margin"]
 
     wrapped_quote_lines = wrap_text(quote_text, quote_font, text_area_width, draw)
     wrapped_quote_str = "\n".join(wrapped_quote_lines)
@@ -228,36 +230,26 @@ def create_quote_image(
     wrapped_author_name_str = ""
     if author_name:
         full_author_name = f"- {author_name}"
-        wrapped_author_name_lines = wrap_text(
-            full_author_name, author_font, text_area_width, draw
-        )
+        wrapped_author_name_lines = wrap_text(full_author_name, author_font, text_area_width, draw)
         wrapped_author_name_str = "\n  ".join(wrapped_author_name_lines)
 
     wrapped_author_handle_str = ""
     if author_handle:
-        wrapped_author_handle_lines = wrap_text(
-            author_handle, handle_font, text_area_width - 15, draw
-        )
+        wrapped_author_handle_lines = wrap_text(author_handle, handle_font, text_area_width - 15, draw)
         wrapped_author_handle_str = "\n".join(wrapped_author_handle_lines)
 
     quote_height, author_name_height, author_handle_height = 0, 0, 0
 
     if wrapped_quote_str:
-        quote_bbox = draw.multiline_textbbox(
-            (0, 0), wrapped_quote_str, font=quote_font, spacing=10
-        )
+        quote_bbox = draw.multiline_textbbox((0, 0), wrapped_quote_str, font=quote_font, spacing=10)
         quote_height = quote_bbox[3] - quote_bbox[1]
 
     if wrapped_author_name_str:
-        author_name_bbox = draw.multiline_textbbox(
-            (0, 0), wrapped_author_name_str, font=author_font, spacing=5
-        )
+        author_name_bbox = draw.multiline_textbbox((0, 0), wrapped_author_name_str, font=author_font, spacing=5)
         author_name_height = author_name_bbox[3] - author_name_bbox[1]
 
     if wrapped_author_handle_str:
-        author_handle_bbox = draw.multiline_textbbox(
-            (0, 0), wrapped_author_handle_str, font=handle_font, spacing=4
-        )
+        author_handle_bbox = draw.multiline_textbbox((0, 0), wrapped_author_handle_str, font=handle_font, spacing=4)
         author_handle_height = author_handle_bbox[3] - author_handle_bbox[1]
 
     gap1, gap2 = 20, 8
@@ -267,7 +259,7 @@ def create_quote_image(
     if author_handle_height > 0:
         total_text_height += gap2 + author_handle_height
 
-    start_y = (CANVAS_HEIGHT - total_text_height) // 2
+    start_y = (miq_config["canvas.height"] - total_text_height) // 2
     current_y = float(start_y)
 
     if wrapped_quote_str:
@@ -275,7 +267,7 @@ def create_quote_image(
             (text_area_left, current_y),
             wrapped_quote_str,
             font=quote_font,
-            fill=TEXT_COLOR,
+            fill=tuple(miq_config["colors.text"]),
             spacing=10,
         )
         current_y += quote_height + gap1
@@ -285,7 +277,7 @@ def create_quote_image(
             (text_area_left, current_y),
             wrapped_author_name_str,
             font=author_font,
-            fill=AUTHOR_COLOR,
+            fill=tuple(miq_config["colors.author"]),
             spacing=5,
         )
         current_y += author_name_height + gap2
@@ -295,7 +287,7 @@ def create_quote_image(
             (text_area_left + 15, current_y),
             wrapped_author_handle_str,
             font=handle_font,
-            fill=AUTHOR_COLOR,
+            fill=tuple(miq_config["colors.author"]),
             spacing=4,
         )
 
@@ -308,18 +300,16 @@ def create_quote_image(
         date_bbox = draw.textbbox((0, 0), display_date, font=footer_font)
         date_width = date_bbox[2] - date_bbox[0]
         date_height = date_bbox[3] - date_bbox[1]
-        date_x = CANVAS_WIDTH - date_width - right_margin
-        date_y = CANVAS_HEIGHT - date_height - bottom_margin
-        draw.text((date_x, date_y), display_date, font=footer_font, fill=FOOTER_COLOR)
+        date_x = miq_config["canvas.width"] - date_width - right_margin
+        date_y = miq_config["canvas.height"] - date_height - bottom_margin
+        draw.text((date_x, date_y), display_date, font=footer_font, fill=tuple(miq_config["colors.footer"]))
 
         footer_bbox = draw.textbbox((0, 0), footer_text, font=footer_font)
         footer_width = footer_bbox[2] - footer_bbox[0]
         footer_height = footer_bbox[3] - footer_bbox[1]
-        footer_x = CANVAS_WIDTH - footer_width - right_margin
+        footer_x = miq_config["canvas.width"] - footer_width - right_margin
         footer_y = date_y - footer_height - line_spacing
-        draw.text(
-            (footer_x, footer_y), footer_text, font=footer_font, fill=FOOTER_COLOR
-        )
+        draw.text((footer_x, footer_y), footer_text, font=footer_font, fill=tuple(miq_config["colors.footer"]))
 
     try:
         base_img.save(output_path, format="PNG")
@@ -363,16 +353,10 @@ class MIQ:
             if custom_avatar.content_type and "image" in custom_avatar.content_type:
                 image_url = custom_avatar.url
             else:
-                await itat.followup.send(
-                    "請上傳有效的圖片檔案 (例如 .png, .jpg)。", ephemeral=True
-                )
+                await itat.followup.send("請上傳有效的圖片檔案 (例如 .png, .jpg)。", ephemeral=True)
                 return
         elif author_member:
-            image_url = (
-                author_member.display_avatar.url
-                if author_member.display_avatar
-                else DISCORD_DEFAULT_AVATAR
-            )
+            image_url = author_member.display_avatar.url if author_member.display_avatar else DISCORD_DEFAULT_AVATAR
         else:
             image_url = DEFAULT_AVATAR
 
@@ -385,9 +369,7 @@ class MIQ:
                 output_path=output_filename,
             )
 
-            await itat.followup.send(
-                file=discord.File(output_filename, filename="quote.png")
-            )
+            await itat.followup.send(file=discord.File(output_filename, filename="quote.png"))
 
         except Exception as e:
             logger.error(f"執行 miq 指令時發生未預期錯誤: {e}")

@@ -145,7 +145,7 @@ def return_to_default_music_settings(guild_id):
                 "is_playing": False,
                 "is_live": False,
                 "if_recommend": False,
-                "played": played[:-50],
+                "played": played[-50:],
                 "queue": [],
                 "pause_time": None,
                 "start_time": None,

@@ -153,7 +153,7 @@ def return_to_default_player_settings(guild_id):
             upsert=True,
         )
         logger.info("returned to default player settings.")
-    except Exception as e:
+    except Exception:
         logger.critical(f"Can not return to default player settings!")
 
 

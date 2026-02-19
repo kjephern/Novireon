@@ -47,9 +47,7 @@ class ServerLoggerSetup:
                 new_values={"settings.is_logging_enabled": True},
                 upsert=True,
             )
-            logger.info(
-                f"Enabled server logging for guild: {itat.guild.name}-{guild_id}"
-            )
+            logger.info(f"Enabled server logging for guild: {itat.guild.name}-{guild_id}")
             await itat.response.send_message("伺服器日誌已啟用。", ephemeral=True)
 
         async def disable():
@@ -58,9 +56,7 @@ class ServerLoggerSetup:
                 new_values={"settings.is_logging_enabled": False},
                 upsert=True,
             )
-            logger.info(
-                f"Disabled server logging for guild: {itat.guild.name}-{guild_id}"
-            )
+            logger.info(f"Disabled server logging for guild: {itat.guild.name}-{guild_id}")
             await itat.response.send_message("伺服器日誌已停用。", ephemeral=True)
 
         if data:
@@ -97,9 +93,7 @@ class ServerLoggerSetup:
         is_logging_enabled = settings.get("is_logging_enabled", False)
         logging_channel_id = settings.get("logging_channel_id", {})
         embed = discord.Embed(title="伺服器日誌設定")
-        embed.add_field(
-            name="是否啟用日誌", value=str(is_logging_enabled), inline=False
-        )
+        embed.add_field(name="是否啟用日誌", value=str(is_logging_enabled), inline=False)
         for key in logging_channel_id:
             if key == "ignore":
                 continue
@@ -112,27 +106,16 @@ class ServerLoggerSetup:
                     value=f"{channel.mention}",
                     inline=False,
                 )
-        embed.color = (
-            discord.Color.green() if is_logging_enabled else discord.Color.red()
-        )
+        embed.color = discord.Color.green() if is_logging_enabled else discord.Color.red()
         await itat.followup.send(embed=embed, ephemeral=True)
 
-    @server_logger.command(
-        name="ignore_channel", description="新增/移除日誌忽略記錄的頻道"
-    )
+    @server_logger.command(name="ignore_channel", description="新增/移除日誌忽略記錄的頻道")
     @app_commands.guild_install()
-    async def set_ignore_channel(
-        self, itat: discord.Interaction, channel: discord.TextChannel
-    ):
+    async def set_ignore_channel(self, itat: discord.Interaction, channel: discord.TextChannel):
         guild_id = itat.guild_id
         data = db_handler.get(query={"_id": guild_id})
         if data:
-            ignore_list = (
-                data[0]
-                .get("settings", {})
-                .get("logging_channel_id", {})
-                .get("ignore", [])
-            )
+            ignore_list = data[0].get("settings", {}).get("logging_channel_id", {}).get("ignore", [])
         else:
             ignore_list = []
 
@@ -147,9 +130,7 @@ class ServerLoggerSetup:
             upsert=True,
         )
 
-        await itat.response.send_message(
-            f"已忽略紀錄 {channel.mention} 的變化", ephemeral=True
-        )
+        await itat.response.send_message(f"已忽略紀錄 {channel.mention} 的變化", ephemeral=True)
 
     @server_logger.command(name="set_log_channel", description="設定伺服器日誌的頻道")
     @app_commands.choices(
@@ -175,11 +156,7 @@ class ServerLoggerSetup:
             data = data[0]
         else:
             data = {}
-        old_channel_id = (
-            data.get("settings", {})
-            .get("logging_channel_id", {})
-            .get(logging_type.value, None)
-        )
+        old_channel_id = data.get("settings", {}).get("logging_channel_id", {}).get(logging_type.value, None)
         # 於忽略列表中移除舊的預設頻道
         if old_channel_id:
             ignore_list = get_ignore_list(guild_id)
@@ -193,9 +170,7 @@ class ServerLoggerSetup:
         # 設定新的預設頻道
         db_handler.update_one(
             query={"_id": guild_id},
-            new_values={
-                f"settings.logging_channel_id.{logging_type.value}": channel.id
-            },
+            new_values={f"settings.logging_channel_id.{logging_type.value}": channel.id},
             upsert=True,
         )
         ignore_channel(guild_id, channel.id)

@@ -106,9 +106,7 @@ async def get_web_audio_duration(url: str):
     ]
 
     try:
-        process = await asyncio.create_subprocess_exec(
-            *args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
+        process = await asyncio.create_subprocess_exec(*args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         stdout, stderr = await process.communicate()
 
@@ -174,9 +172,7 @@ def create_queue_embed(data: dict) -> discord.Embed:
         value="直播" if data.get("is_live", False) else format_time(duration),
     )
 
-    embed.add_field(
-        name="\u200b", value=f"由{data.get('requester', 'Unknown User')}加入"
-    )
+    embed.add_field(name="\u200b", value=f"由{data.get('requester', 'Unknown User')}加入")
     if thumbnail:
         embed.set_thumbnail(url=thumbnail)
     return embed

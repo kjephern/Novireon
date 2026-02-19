@@ -90,9 +90,7 @@ class Functions:
                 data = Monster_siren.get_song_data(request)
             case "direct_audio":
                 duration = await music_utils.get_web_audio_duration(request)
-                avatar = (
-                    itat.user.display_avatar.url if itat.user.display_avatar else None
-                )
+                avatar = itat.user.display_avatar.url if itat.user.display_avatar else None
                 data = {
                     "author": "Unknown Artist",
                     "title": "Unknown Title",
@@ -106,17 +104,13 @@ class Functions:
                     return
         user = itat.user.nick if itat.user.nick else itat.user.name
         if data is None:
-            await itat.followup.send(
-                "找不到相關的音樂，請嘗試其他關鍵字或網址", ephemeral=True
-            )
+            await itat.followup.send("找不到相關的音樂，請嘗試其他關鍵字或網址", ephemeral=True)
             return
         else:
             data.update({"requester": user})
             db_handler.append(query={"_id": guild_id}, field="queue", value=data)
 
-        if ("client" not in voice_data[guild_id]) or (
-            not voice_data[guild_id]["client"].is_connected()
-        ):
+        if ("client" not in voice_data[guild_id]) or (not voice_data[guild_id]["client"].is_connected()):
             await itat.followup.send("正在處理播放請求", ephemeral=True)
             await Functions._play(guild_id)
 
@@ -142,9 +136,7 @@ class Functions:
 
         metadatas = await Youtube.get_playlist_metadata(request)
         if metadatas is None:
-            await itat.followup.send(
-                "找不到相關的播放列表，請嘗試其他關鍵字或網址", ephemeral=True
-            )
+            await itat.followup.send("找不到相關的播放列表，請嘗試其他關鍵字或網址", ephemeral=True)
             return
         max_songs_count = min(
             max_results,
@@ -169,15 +161,11 @@ class Functions:
                 await itat.channel.send(embed=embed)
                 await asyncio.sleep(1)
             except Exception as e:
-                await itat.channel.send(
-                    "加入播放列表時發生錯誤，部分歌曲可能未加入佇列。"
-                )
+                await itat.channel.send("加入播放列表時發生錯誤，部分歌曲可能未加入佇列。")
                 logger.error(f"Error adding song from playlist: {e}")
                 continue
 
-        if ("client" not in voice_data[guild_id]) or (
-            not voice_data[guild_id]["client"].is_connected()
-        ):
+        if ("client" not in voice_data[guild_id]) or (not voice_data[guild_id]["client"].is_connected()):
             await itat.followup.send("正在處理播放請求", ephemeral=True)
             await Functions._play(guild_id)
 
@@ -189,9 +177,7 @@ class Functions:
             def after_play(error):
                 if error:
                     logger.info(f"Player error: {error}")
-                future = asyncio.run_coroutine_threadsafe(
-                    Functions.play_next(guild_id), loop
-                )
+                future = asyncio.run_coroutine_threadsafe(Functions.play_next(guild_id), loop)
                 try:
                     future.result()
                 except Exception as e:
@@ -201,10 +187,7 @@ class Functions:
 
             try:
                 itat: Itat = voice_data[guild_id]["itat"]
-                if (
-                    "client" not in voice_data[guild_id]
-                    or not voice_data[guild_id]["client"].is_connected()
-                ):
+                if "client" not in voice_data[guild_id] or not voice_data[guild_id]["client"].is_connected():
                     voice_client: VC = await itat.user.voice.channel.connect()
                     voice_data[guild_id]["client"] = voice_client
                 else:
@@ -212,18 +195,14 @@ class Functions:
 
                 await music_channel.send("正在載入...", delete_after=5)
                 try:
-                    source = discord.FFmpegOpusAudio(
-                        next_song_data["song_url"], **ffmpeg_options
-                    )
+                    source = discord.FFmpegOpusAudio(next_song_data["song_url"], **ffmpeg_options)
                 except Exception as e:
                     logger.error(e)
                 voice_client.play(source, after=after_play)
 
             except Exception as e:
                 logger.error(f"Error during playback: {e}")
-                await itat.followup.send(
-                    "無法播放，請檢查連結或聯絡開發者", ephemeral=True
-                )
+                await itat.followup.send("無法播放，請檢查連結或聯絡開發者", ephemeral=True)
 
             db_handler.update_one(
                 query={"_id": guild_id},
@@ -257,13 +236,9 @@ class Functions:
                 upsert=True,
             )
 
-            voice_data[guild_id]["progress_task"] = asyncio.create_task(
-                Functions.playback_state_updater(guild_id)
-            )
+            voice_data[guild_id]["progress_task"] = asyncio.create_task(Functions.playback_state_updater(guild_id))
         except Exception as e:
-            await voice_data[guild_id]["music_channel"].send(
-                "無法播放，請使用連結或再試一次", delete_after=10
-            )
+            await voice_data[guild_id]["music_channel"].send("無法播放，請使用連結或再試一次", delete_after=10)
             logger.error(f"_play error: {e}")
 
     async def _resume(guild_id):
@@ -334,11 +309,19 @@ class Functions:
             if current_playing is None:
                 return
             queue = data.get("queue", None)
-            db_handler.append(
-                query={"_id": guild_id},
-                field="played",
-                value=current_playing,
-            )
+            try:
+                if not current_playing.get("is_live", False):
+                    current_playing = {
+                        "author": current_playing.get("author"),
+                        "title": current_playing.get("title"),
+                    }
+                    db_handler.append(
+                        query={"_id": guild_id},
+                        field="played",
+                        value=current_playing,
+                    )
+            except:
+                pass
             if len(queue) > 0:
                 await Functions._play(guild_id)
             else:
@@ -346,9 +329,7 @@ class Functions:
         except Exception as e:
             logger.error(f"play_next error: {e}")
             await Functions._stop(guild_id)
-            await voice_data[guild_id]["music_channel"].send(
-                "播放下一首時出現問題", delete_after=10
-            )
+            await voice_data[guild_id]["music_channel"].send("播放下一首時出現問題", delete_after=10)
 
     async def search(itat: Itat, request, region="youtube"):
         try:
@@ -356,9 +337,7 @@ class Functions:
 
             match region:
                 case "youtube":
-                    results = await Youtube.get_youtube_search_results(
-                        request, max_results=10
-                    )
+                    results = await Youtube.get_youtube_search_results(request, max_results=10)
 
             if len(results) == 0:
                 await itat.followup.send("找不到任何結果。", ephemeral=True)
@@ -379,9 +358,7 @@ class Functions:
                     for result in results
                 ]
             ]
-            search_menu = discord.ui.Select(
-                placeholder="選擇一首歌", options=video_opt, min_values=1, max_values=1
-            )
+            search_menu = discord.ui.Select(placeholder="選擇一首歌", options=video_opt, min_values=1, max_values=1)
             view = View(timeout=30)
             view.add_item(search_menu)
             future = asyncio.Future()
@@ -390,9 +367,7 @@ class Functions:
                 if not future.done():
                     future.set_result(None)
                 search_menu.disabled = True
-                await original_message.edit(
-                    content="選擇已超時，請重新搜尋。", view=None
-                )
+                await original_message.edit(content="選擇已超時，請重新搜尋。", view=None)
 
             view.on_timeout = on_timeout
 
@@ -413,17 +388,13 @@ class Functions:
 
             search_menu.callback = search_menu_callback
 
-            original_message = await itat.followup.send(
-                content="請從下方選擇一個結果", view=view, ephemeral=True
-            )
+            original_message = await itat.followup.send(content="請從下方選擇一個結果", view=view, ephemeral=True)
             selected_song_data = await future
             return selected_song_data
 
         except Exception as e:
             logger.error(f"search error: {e}")
-            await itat.followup.send(
-                "搜尋時發生錯誤，請使用有效連結或再試一次。", ephemeral=True
-            )
+            await itat.followup.send("搜尋時發生錯誤，請使用有效連結或再試一次。", ephemeral=True)
 
     async def playback_state_updater(guild_id):
         try:
@@ -432,26 +403,18 @@ class Functions:
                     break
 
                 client: VC = voice_data[guild_id]["client"]
-                human_members = [
-                    member for member in client.channel.members if not member.bot
-                ]
+                human_members = [member for member in client.channel.members if not member.bot]
 
                 if len(human_members) == 0:
-                    logger.info(
-                        f"No users left in voice channel for guild {guild_id}. Stopping playback."
-                    )
+                    logger.info(f"No users left in voice channel for guild {guild_id}. Stopping playback.")
                     await Functions._stop(guild_id)
                     break
 
-                embed_msg: discord.Message = voice_data[guild_id].get(
-                    "state_embed_message"
-                )
+                embed_msg: discord.Message = voice_data[guild_id].get("state_embed_message")
 
                 if embed_msg:
                     if len(embed_msg.embeds) == 0:
-                        logger.warning(
-                            f"Embed message has no embeds for guild {guild_id}."
-                        )
+                        logger.warning(f"Embed message has no embeds for guild {guild_id}.")
                         break
                     embed = embed_msg.embeds[0]
                     new_progress_bar = music_utils.generate_progress_bar(guild_id)

@@ -17,9 +17,7 @@ class Monster_siren:
             logger.info(f"正在從頁面 URL 獲取歌曲資訊...")
             cid = page_url.split("/")[-1]
 
-            song_response = requests.get(
-                url=f"https://monster-siren.hypergryph.com/api/song/{cid}"
-            )
+            song_response = requests.get(url=f"https://monster-siren.hypergryph.com/api/song/{cid}")
             song_response.raise_for_status()
             raw_song_data = song_response.json()["data"]
 
@@ -27,9 +25,7 @@ class Monster_siren:
             if not album_cid:
                 raise ValueError("API 回應中未找到專輯 ID (albumCid)")
 
-            album_response = requests.get(
-                url=f"https://monster-siren.hypergryph.com/api/album/{album_cid}/detail"
-            )
+            album_response = requests.get(url=f"https://monster-siren.hypergryph.com/api/album/{album_cid}/detail")
             album_response.raise_for_status()
             raw_album_data = album_response.json()["data"]
             logger.info("成功獲取 API 元數據！")
@@ -106,9 +102,7 @@ def calculate_duration_from_audio_url(audio_url: str, timeout=15):
                 logger.info("成功使用部份下載模式計算出時長！")
                 return duration
         except Exception as e:
-            logger.warning(
-                f"部份下載失敗 ({type(e).__name__}: {e})，將降級為完整下載。"
-            )
+            logger.warning(f"部份下載失敗 ({type(e).__name__}: {e})，將降級為完整下載。")
     try:
         logger.info("執行標準模式 (完整下載)...")
         full_response = requests.get(audio_url, timeout=timeout * 2)

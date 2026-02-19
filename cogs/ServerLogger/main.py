@@ -148,13 +148,7 @@ class ServerLoggerMain:
                 if added_roles:
                     embed.add_field(
                         name=f"新增身分組",
-                        value="\n".join(
-                            [
-                                role.mention
-                                for role in added_roles
-                                if role.is_default() is False
-                            ]
-                        ),
+                        value="\n".join([role.mention for role in added_roles if role.is_default() is False]),
                         inline=False,
                     )
                     if not removed_roles:
@@ -162,13 +156,7 @@ class ServerLoggerMain:
                 if removed_roles:
                     embed.add_field(
                         name=f"移除身分組",
-                        value="\n".join(
-                            [
-                                role.mention
-                                for role in removed_roles
-                                if role.is_default() is False
-                            ]
-                        ),
+                        value="\n".join([role.mention for role in removed_roles if role.is_default() is False]),
                         inline=False,
                     )
                     if not added_roles:
@@ -201,9 +189,7 @@ class ServerLoggerMain:
                 if not member_channel_id:
                     return
                 if member_channel_id:
-                    channel: discord.TextChannel = self.bot.get_channel(
-                        member_channel_id
-                    )
+                    channel: discord.TextChannel = self.bot.get_channel(member_channel_id)
                     if not channel:
                         channel = await self.bot.fetch_channel(member_channel_id)
                     if not channel:

@@ -46,11 +46,7 @@ class PingCommands:
         msg_latency = (end_time - start_time) * 1000
 
         api_latency = self.bot.latency * 1000
-        voice_latency = (
-            itat.guild.voice_client.latency * 1000
-            if itat.guild and itat.guild.voice_client
-            else None
-        )
+        voice_latency = itat.guild.voice_client.latency * 1000 if itat.guild and itat.guild.voice_client else None
 
         server_cpu_usage = await asyncio.to_thread(psutil.cpu_percent, interval=1)
 
@@ -74,10 +70,7 @@ class PingCommands:
             timestamp=datetime.datetime.utcnow(),
         )
 
-        latency_info = (
-            f"**API 延遲:** `{api_latency:.2f} ms`\n"
-            f"**訊息來回:** `{msg_latency:.2f} ms`"
-        )
+        latency_info = f"**API 延遲:** `{api_latency:.2f} ms`\n" f"**訊息來回:** `{msg_latency:.2f} ms`"
         if voice_latency is not None:
             latency_info += f"\n**語音延遲:** `{voice_latency:.2f} ms`"
         embed.add_field(name="網路延遲", value=latency_info, inline=True)
@@ -88,10 +81,7 @@ class PingCommands:
         )
         embed.add_field(name="伺服器主機狀態", value=host_info, inline=True)
 
-        bot_info = (
-            f"**程序記憶體:** `{bot_memory_usage_mb:.2f} MB`\n"
-            f"**已運行時間:** `{uptime}`"
-        )
+        bot_info = f"**程序記憶體:** `{bot_memory_usage_mb:.2f} MB`\n" f"**已運行時間:** `{uptime}`"
         embed.add_field(name="機器人自身狀態", value=bot_info, inline=False)
 
         embed.set_footer(

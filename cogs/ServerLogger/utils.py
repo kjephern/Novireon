@@ -21,9 +21,7 @@ db_handler = MongoCRUD(
 def get_ignore_list(guild_id: int):
     data = db_handler.get(query={"_id": guild_id})
     if data:
-        ignore_list = (
-            data[0].get("settings", {}).get("logging_channel_id", {}).get("ignore", [])
-        )
+        ignore_list = data[0].get("settings", {}).get("logging_channel_id", {}).get("ignore", [])
     else:
         ignore_list = []
     return ignore_list

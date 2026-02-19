@@ -6,9 +6,7 @@ def setup_logging():
     """設定應用程式的日誌記錄器"""
 
     # 創建一個格式化器
-    log_format = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
+    log_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
     # 獲取根記錄器 (root logger)
     root_logger = logging.getLogger()
@@ -20,7 +18,7 @@ def setup_logging():
     console_handler.setLevel(logging.INFO)
 
     # --- 設定檔案輸出 (FileHandler) ---
-    file_handler = logging.FileHandler("app.log", mode="w")
+    file_handler = logging.FileHandler("app.log", mode="w", encoding="utf-8")
     file_handler.setFormatter(log_format)
     file_handler.setLevel(logging.DEBUG)
 

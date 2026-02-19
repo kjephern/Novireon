@@ -39,36 +39,24 @@ class MongoCRUD:
             self.logger.debug(f"Found {len(results)} document(s) for query: {query}")
             return results
         except PyMongoError as e:
-            self.logger.error(
-                f"Failed to get data with query {query}: {e}", exc_info=True
-            )
+            self.logger.error(f"Failed to get data with query {query}: {e}", exc_info=True)
             return []
 
-    def update_many(self, query: dict, new_values: dict = {}):
+    def update_many(self, query: dict, new_values: dict = {}, upsert: bool = True):
         """更新文件。"""
-        self.logger.debug(
-            f"Executing update_many with query: {query} and values: {new_values}"
-        )
+        self.logger.debug(f"Executing update_many with query: {query} and values: {new_values}")
         try:
-            result = self.collection.update_many(query, {"$set": new_values})
+            result = self.collection.update_many(query, {"$set": new_values}, upsert=upsert)
             if result.matched_count > 0:
-                self.logger.debug(
-                    f"Matched {result.matched_count} and modified {result.modified_count} document(s)."
-                )
+                self.logger.debug(f"Matched {result.matched_count} and modified {result.modified_count} document(s).")
             else:
-                self.logger.warning(
-                    f"Update query {query} did not match any documents."
-                )
+                self.logger.warning(f"Update query {query} did not match any documents.")
             return result
         except PyMongoError as e:
-            self.logger.error(
-                f"Failed to update data with query {query}: {e}", exc_info=True
-            )
+            self.logger.error(f"Failed to update data with query {query}: {e}", exc_info=True)
             return None
 
-    def update_one(
-        self, query: dict[str, any], new_values: dict[str, any], upsert: bool = False
-    ):
+    def update_one(self, query: dict[str, any], new_values: dict[str, any], upsert: bool = True):
         """
         更新單一文件。
 
@@ -79,29 +67,19 @@ class MongoCRUD:
         self.logger.debug(f"Executing update_one with query: {query}, upsert={upsert}")
         try:
             # 使用 "$set" 來指定要更新的欄位
-            result = self.collection.update_one(
-                query, {"$set": new_values}, upsert=upsert
-            )
+            result = self.collection.update_one(query, {"$set": new_values}, upsert=upsert)
 
             if result.upserted_id:
-                self.logger.debug(
-                    f"Upserted new document with ID: {result.upserted_id}"
-                )
+                self.logger.debug(f"Upserted new document with ID: {result.upserted_id}")
             elif result.matched_count > 0:
-                self.logger.debug(
-                    f"Matched {result.matched_count} and modified {result.modified_count} document(s)."
-                )
+                self.logger.debug(f"Matched {result.matched_count} and modified {result.modified_count} document(s).")
             else:
                 # 只有在 upsert=False 時，這個警告才有意義
                 if not upsert:
-                    self.logger.warning(
-                        f"Update query {query} did not match any documents."
-                    )
+                    self.logger.warning(f"Update query {query} did not match any documents.")
             return result
         except PyMongoError as e:
-            self.logger.error(
-                f"Failed to update data with query {query}: {e}", exc_info=True
-            )
+            self.logger.error(f"Failed to update data with query {query}: {e}", exc_info=True)
             return None
 
     def append(self, query: dict, field: str, value):
@@ -110,18 +88,12 @@ class MongoCRUD:
         try:
             result = self.collection.update_one(query, {"$push": {field: value}})
             if result.matched_count > 0:
-                self.logger.debug(
-                    f"Successfully appended value to field '{field}' for a matched document."
-                )
+                self.logger.debug(f"Successfully appended value to field '{field}' for a matched document.")
             else:
-                self.logger.warning(
-                    f"Append query {query} did not match any documents."
-                )
+                self.logger.warning(f"Append query {query} did not match any documents.")
             return result
         except PyMongoError as e:
-            self.logger.error(
-                f"Failed to append data for query {query}: {e}", exc_info=True
-            )
+            self.logger.error(f"Failed to append data for query {query}: {e}", exc_info=True)
             return None
 
     def pop(self, query: dict, field: str, direction: int = -1):
@@ -137,9 +109,7 @@ class MongoCRUD:
         Returns:
             dict | None: 被彈出的元素 (如果成功)，否則返回 None。
         """
-        self.logger.debug(
-            f"Executing atomic pop on field '{field}' with query: {query}"
-        )
+        self.logger.debug(f"Executing atomic pop on field '{field}' with query: {query}")
         try:
             # 使用 find_one_and_update 進行原子性的 "查詢並更新"
             # return_document=ReturnDocument.BEFORE 會返回文件在被更新「之前」的樣子
@@ -163,15 +133,11 @@ class MongoCRUD:
                 return None
 
             # 根據彈出的方向，返回正確的元素
-            popped_element = (
-                array_before_pop[0] if direction == -1 else array_before_pop[-1]
-            )
+            popped_element = array_before_pop[0] if direction == -1 else array_before_pop[-1]
 
             self.logger.debug(f"Successfully popped element from field '{field}'.")
             return popped_element
 
         except PyMongoError as e:
-            self.logger.error(
-                f"Failed to pop data for query {query}: {e}", exc_info=True
-            )
+            self.logger.error(f"Failed to pop data for query {query}: {e}", exc_info=True)
             return None

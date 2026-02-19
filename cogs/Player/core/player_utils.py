@@ -140,7 +140,6 @@ def return_to_default_player_settings(guild_id):
             query={"_id": guild_id},
             new_values={
                 "current_playing": {},
-                "embed_message_id": None,
                 "is_playing": False,
                 "is_live": False,
                 "if_recommend": False,
@@ -150,11 +149,10 @@ def return_to_default_player_settings(guild_id):
                 "start_time": None,
                 "total_paused_duration": 0,
             },
-            upsert=True,
         )
         logger.info("returned to default player settings.")
-    except Exception:
-        logger.critical(f"Can not return to default player settings!")
+    except Exception as e:
+        logger.critical(f"Can not return to default player settings!\n{e}")
 
 
 def create_queue_embed(data: dict) -> discord.Embed:

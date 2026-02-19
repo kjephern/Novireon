@@ -7,6 +7,7 @@ from discord import VoiceClient as VC
 from pymongo import MongoClient
 
 from .player_data import voice_data
+from .player_errors import *
 from mongo_crud import MongoCRUD
 
 logging.basicConfig(level=logging.INFO)
@@ -29,11 +30,7 @@ class Checkers:
     async def _is_in_valid_voice_channel(itat: Itat):
         guild_id = itat.guild_id
         if itat.user.voice is None:
-            await itat.followup.send(
-                "您必須先加入一個語音頻道才能使用此指令！",
-                ephemeral=True,
-            )
-            return False
+            raise NotInValidVoiceChannel
         if guild_id not in voice_data:
             return True
         if "client" not in voice_data[guild_id]:
@@ -45,17 +42,11 @@ class Checkers:
 
     @staticmethod
     def is_in_valid_voice_channel():
-        def predicate(itat: Itat) -> bool:
-            return Checkers._is_in_valid_voice_channel(itat)
-
-        return app_commands.check(predicate)
+        return app_commands.check(Checkers._is_in_valid_voice_channel)
 
     @staticmethod
     def is_dj():
-        def predicate(itat: Itat) -> bool:
-            return Checkers._is_dj(itat)
-
-        return app_commands.check(predicate)
+        return app_commands.check(Checkers._is_dj)
 
     @staticmethod
     def _is_dj(itat: Itat) -> bool:
@@ -66,6 +57,9 @@ class Checkers:
         if itat.user.guild_permissions.administrator:
             return True
         if dj_role_id is None:
-            return False
+            raise NotDJ
         elif dj_role_id is not None:
-            return dj_role_id in [role.id for role in itat.user.roles]
+            if dj_role_id in [role.id for role in itat.user.roles]:
+                return True
+            else:
+                raise NotDJ

@@ -1,17 +1,13 @@
 import asyncio
 import logging
-import os
 import yt_dlp
 
-from googleapiclient.discovery import build
 
 from config.Music_config import *
 
-YOUTUBE_API_KEY = os.getenv("GOOGLE")
 
 youtube_base_url = "https://www.youtube.com/"
 youtube_watch_url = youtube_base_url + "watch?v="
-youtube = build("youtube", "v3", developerKey=YOUTUBE_API_KEY)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("music.youtube")

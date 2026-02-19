@@ -47,11 +47,9 @@ Novireon is a versatile Discord bot built with `discord.py`, designed to enhance
     Create a `.env` file in the root directory and add the following variables:
     ```env
     DISCORD=YOUR_DISCORD_BOT_TOKEN
-    GOOGLE=YOUR_GOOGLE_API_KEY
     MONGO_URI=YOUR_MONGODB_CONNECTION_STRING
     ```
     *   `DISCORD`: Your Discord bot's token.
-    *   `GOOGLE`: A Google API key with the YouTube Data API v3 enabled is required for the music search functionality.
     *   `MONGO_URI`: Your connection string for a MongoDB database.
 
 4.  **Run the bot:**

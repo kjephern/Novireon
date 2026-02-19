@@ -1,19 +1,15 @@
-import asyncio
 import discord
 import logging
-import random
 import os
 
 from discord import app_commands
 from discord import Interaction as Itat
-from discord import VoiceClient as VC
 from discord.ext import commands
 from pymongo import MongoClient
 
 from mongo_crud import MongoCRUD
 from .core import music_utils
 from .core.music_checkers import Checkers
-from .core.music_data import voice_data
 from .core.music_functions import Functions
 
 from config.Music_config import *

@@ -6,11 +6,11 @@ from discord import Interaction as Itat
 from discord import VoiceClient as VC
 from pymongo import MongoClient
 
-from .music_data import voice_data
+from .player_data import voice_data
 from mongo_crud import MongoCRUD
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("music.checkers")
+logger = logging.getLogger("player.checkers")
 
 
 mongo_uri = os.getenv("MONGO_URI")
@@ -19,7 +19,7 @@ mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=15000)
 db_handler = MongoCRUD(
     client=mongo_client,
     db_name="Norvireon_bot_db",
-    collection_name="Music_data",
+    collection_name="Player_data",
     logger=logger,
 )
 

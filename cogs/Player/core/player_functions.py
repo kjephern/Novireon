@@ -11,8 +11,8 @@ from discord import VoiceClient as VC
 from pymongo import MongoClient
 
 from mongo_crud import MongoCRUD
-from . import music_utils
-from .music_data import voice_data
+from . import player_utils
+from .player_data import voice_data
 from .view.control_views import ControlView
 from ..youtube import Youtube
 from ..monster_siren import Monster_siren
@@ -20,8 +20,8 @@ from ..monster_siren import Monster_siren
 from src.util.config import get_config
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("music.functions")
-music_config = get_config("Music")
+logger = logging.getLogger("player.functions")
+player_config = get_config("Player")
 
 ffmpeg_options = {
     "before_options": (
@@ -49,7 +49,7 @@ mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=15000)
 db_handler = MongoCRUD(
     client=mongo_client,
     db_name="Norvireon_bot_db",
-    collection_name="Music_data",
+    collection_name="Player_data",
     logger=logger,
 )
 
@@ -59,14 +59,14 @@ class Functions:
         try:
             client: VC = voice_data[guild_id].get("client")
             data = db_handler.get(query={"_id": guild_id})[0]
-            music_channel: discord.TextChannel = voice_data[guild_id]["music_channel"]
+            player_channel: discord.TextChannel = voice_data[guild_id]["player_channel"]
             if client and data.get("is_playing"):
                 client.pause()
                 db_handler.update_many(
                     query={"_id": guild_id},
                     new_values={"is_playing": False, "pause_time": time.time()},
                 )
-                await music_channel.send("音樂已暫停", delete_after=5)
+                await player_channel.send("音樂已暫停", delete_after=5)
         except Exception as e:
             logger.error(f"pause command error: {e}")
 
@@ -74,12 +74,12 @@ class Functions:
         guild_id = itat.guild_id
         if guild_id not in voice_data:
             voice_data[guild_id] = {}
-            music_utils.return_to_default_music_settings(guild_id)
+            player_utils.return_to_default_player_settings(guild_id)
 
-        voice_data[guild_id]["music_channel"] = itat.channel
+        voice_data[guild_id]["player_channel"] = itat.channel
         voice_data[guild_id]["itat"] = itat
 
-        match music_utils.get_source_name(request):
+        match player_utils.get_source_name(request):
             case "youtube":
                 try:
                     data = await Youtube.get_data_from_single(request)
@@ -89,7 +89,7 @@ class Functions:
             case "monster_siren":
                 data = Monster_siren.get_song_data(request)
             case "direct_audio":
-                duration = await music_utils.get_web_audio_duration(request)
+                duration = await player_utils.get_web_audio_duration(request)
                 avatar = itat.user.display_avatar.url if itat.user.display_avatar else None
                 data = {
                     "author": "Unknown Artist",
@@ -115,23 +115,23 @@ class Functions:
             await Functions._play(guild_id)
 
         else:
-            embed = music_utils.create_queue_embed(data)
+            embed = player_utils.create_queue_embed(data)
             await itat.channel.send(embed=embed)
 
     async def pre_play_playlist(itat: Itat, request, max_results, if_shuffle):
         if max_results < 1:
             max_results = 1
-        elif max_results > music_config["limits.max_song_count_add_via_playlist"]:
-            max_results = music_config["limits.max_song_count_add_via_playlist"]
+        elif max_results > player_config["limits.max_song_count_add_via_playlist"]:
+            max_results = player_config["limits.max_song_count_add_via_playlist"]
 
         await itat.response.send_message("處理中", ephemeral=True)
 
         guild_id = itat.guild_id
         if guild_id not in voice_data:
             voice_data[guild_id] = {}
-            music_utils.return_to_default_music_settings(guild_id)
+            player_utils.return_to_default_player_settings(guild_id)
 
-        voice_data[guild_id]["music_channel"] = itat.channel
+        voice_data[guild_id]["player_channel"] = itat.channel
         voice_data[guild_id]["itat"] = itat
 
         metadatas = await Youtube.get_playlist_metadata(request)
@@ -141,7 +141,7 @@ class Functions:
         max_songs_count = min(
             max_results,
             len(metadatas),
-            music_config["limits.max_song_count_add_via_playlist"],
+            player_config["limits.max_song_count_add_via_playlist"],
         )
         if if_shuffle:
             selected_songs = random.sample(
@@ -157,7 +157,7 @@ class Functions:
                 data = await Youtube.get_data_from_single(song["webpage_url"])
                 data.update({"requester": user})
                 db_handler.append(query={"_id": guild_id}, field="queue", value=data)
-                embed = music_utils.create_queue_embed(data)
+                embed = player_utils.create_queue_embed(data)
                 await itat.channel.send(embed=embed)
                 await asyncio.sleep(1)
             except Exception as e:
@@ -172,7 +172,7 @@ class Functions:
     async def _play(guild_id):
         try:
             loop = asyncio.get_event_loop()
-            music_channel: discord.TextChannel = voice_data[guild_id]["music_channel"]
+            player_channel: discord.TextChannel = voice_data[guild_id]["player_channel"]
 
             def after_play(error):
                 if error:
@@ -193,7 +193,7 @@ class Functions:
                 else:
                     voice_client = voice_data[guild_id]["client"]
 
-                await music_channel.send("正在載入...", delete_after=5)
+                await player_channel.send("正在載入...", delete_after=5)
                 try:
                     source = discord.FFmpegOpusAudio(next_song_data["song_url"], **ffmpeg_options)
                 except Exception as e:
@@ -218,7 +218,7 @@ class Functions:
             embed = discord.Embed(
                 title=next_song_data["title"],
                 description="播放中...",
-                color=music_config["colors.playing"],
+                color=player_config["colors.playing"],
             )
             thumbnail = next_song_data.get("thumbnail", None)
             if thumbnail:
@@ -227,7 +227,7 @@ class Functions:
             if requester:
                 embed.add_field(name="\u200b", value=f"由{requester}加入")
             control_view = ControlView(guild_id)
-            embed_msg = await music_channel.send(view=control_view, embed=embed)
+            embed_msg = await player_channel.send(view=control_view, embed=embed)
             voice_data[guild_id]["state_embed_message"] = embed_msg
 
             db_handler.update_one(
@@ -236,16 +236,18 @@ class Functions:
                 upsert=True,
             )
 
-            voice_data[guild_id]["progress_task"] = asyncio.create_task(Functions.playback_state_updater(guild_id))
+            voice_data[guild_id]["playback_state_updater"] = asyncio.create_task(
+                Functions.playback_state_updater(guild_id)
+            )
         except Exception as e:
-            await voice_data[guild_id]["music_channel"].send("無法播放，請使用連結或再試一次", delete_after=10)
+            await voice_data[guild_id]["player_channel"].send("無法播放，請使用連結或再試一次", delete_after=10)
             logger.error(f"_play error: {e}")
 
     async def _resume(guild_id):
         try:
             client: VC = voice_data[guild_id].get("client")
             data = db_handler.get(query={"_id": guild_id})[0]
-            music_channel: discord.TextChannel = voice_data[guild_id]["music_channel"]
+            player_channel: discord.TextChannel = voice_data[guild_id]["player_channel"]
             if client and not data.get("is_playing"):
                 client.resume()
                 paused_for = time.time() - data["pause_time"]
@@ -259,7 +261,7 @@ class Functions:
                         "is_playing": True,
                     },
                 )
-                await music_channel.send("音樂已恢復播放", delete_after=5)
+                await player_channel.send("音樂已恢復播放", delete_after=5)
         except Exception as e:
             logger.error(f"resume command error: {e}")
 
@@ -267,13 +269,13 @@ class Functions:
         try:
             client: VC = voice_data[guild_id].get("client")
             data = db_handler.get(query={"_id": guild_id})[0]
-            music_channel = voice_data[guild_id].get("music_channel")
+            player_channel = voice_data[guild_id].get("player_channel")
             if client and data.get("is_playing"):
                 client.stop()
             else:
-                await music_channel.send("沒有正在播放的音樂", delete_after=5)
+                await player_channel.send("沒有正在播放的音樂", delete_after=5)
         except Exception as e:
-            await music_channel.send("播放下一首時出現問題", delete_after=10)
+            await player_channel.send("播放下一首時出現問題", delete_after=10)
             await Functions._stop(guild_id)
             logger.error(f"skip command error: {e}")
 
@@ -281,21 +283,21 @@ class Functions:
         if guild_id not in voice_data:
             return
 
-        if "progress_task" not in voice_data[guild_id]:
+        if "playback_state_updater" not in voice_data[guild_id]:
             return
 
         if "client" not in voice_data[guild_id]:
             return
 
-        voice_data[guild_id]["progress_task"].cancel()
+        voice_data[guild_id]["playback_state_updater"].cancel()
         client: VC = voice_data[guild_id]["client"]
 
         if client.is_connected():
-            music_utils.return_to_default_music_settings(guild_id)
+            player_utils.return_to_default_player_settings(guild_id)
             await client.disconnect(force=True)
         await asyncio.sleep(1)
         if guild_id in voice_data:
-            await voice_data[guild_id]["music_channel"].send("已停止並斷開連接")
+            await voice_data[guild_id]["player_channel"].send("已停止並斷開連接")
             del voice_data[guild_id]
 
     async def play_next(guild_id):
@@ -329,7 +331,7 @@ class Functions:
         except Exception as e:
             logger.error(f"play_next error: {e}")
             await Functions._stop(guild_id)
-            await voice_data[guild_id]["music_channel"].send("播放下一首時出現問題", delete_after=10)
+            await voice_data[guild_id]["player_channel"].send("播放下一首時出現問題", delete_after=10)
 
     async def search(itat: Itat, request, region="youtube"):
         try:
@@ -417,7 +419,7 @@ class Functions:
                         logger.warning(f"Embed message has no embeds for guild {guild_id}.")
                         break
                     embed = embed_msg.embeds[0]
-                    new_progress_bar = music_utils.generate_progress_bar(guild_id)
+                    new_progress_bar = player_utils.generate_progress_bar(guild_id)
                     if embed.description != new_progress_bar:
                         embed.description = new_progress_bar
                         control_view = ControlView(guild_id)
@@ -426,7 +428,7 @@ class Functions:
                         except discord.NotFound:
                             break
 
-                await asyncio.sleep(music_config["playback.state.update_interval"])
+                await asyncio.sleep(player_config["playback.state.update_interval"])
 
                 guild_data = voice_data.get(guild_id)
                 if guild_data:

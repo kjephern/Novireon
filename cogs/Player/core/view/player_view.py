@@ -7,11 +7,11 @@ from discord.ui import Button
 from pymongo import MongoClient
 
 from mongo_crud import MongoCRUD
-from ..music_checkers import Checkers
-from ..music_functions import Functions
+from ..player_checkers import Checkers
+from ..player_functions import Functions
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("Music_Core")
+logger = logging.getLogger("Player_Core")
 
 mongo_uri = os.getenv("MONGO_URI")
 mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=15000)
@@ -19,7 +19,7 @@ mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=15000)
 db_handler = MongoCRUD(
     client=mongo_client,
     db_name="Norvireon_bot_db",
-    collection_name="Music_data",
+    collection_name="Player_data",
     logger=logger,
 )
 
@@ -39,16 +39,10 @@ class Views:
             self.guild_id = guild_id
 
         async def callback(self, itat: discord.Interaction):
-            if not Checkers._is_dj(
-                itat
-            ) or not await Checkers._is_in_valid_voice_channel(itat):
-                await itat.response.send_message(
-                    "你沒有足夠的權限", ephemeral=True, delete_after=5
-                )
+            if not Checkers._is_dj(itat) or not await Checkers._is_in_valid_voice_channel(itat):
+                await itat.response.send_message("你沒有足夠的權限", ephemeral=True, delete_after=5)
                 return
-            await itat.response.send_message(
-                "正在處理請求", ephemeral=True, delete_after=5
-            )
+            await itat.response.send_message("正在處理請求", ephemeral=True, delete_after=5)
             is_live = self.data["current_playing"].get("is_live", False)
             if is_live:
                 await itat.followup.send("直播無法暫停", ephemeral=True)
@@ -65,16 +59,10 @@ class Views:
             self.guild_id = guild_id
 
         async def callback(self, itat: discord.Interaction):
-            if not Checkers._is_dj(
-                itat
-            ) or not await Checkers._is_in_valid_voice_channel(itat):
-                await itat.response.send_message(
-                    "你沒有足夠的權限", ephemeral=True, delete_after=5
-                )
+            if not Checkers._is_dj(itat) or not await Checkers._is_in_valid_voice_channel(itat):
+                await itat.response.send_message("你沒有足夠的權限", ephemeral=True, delete_after=5)
                 return
-            await itat.response.send_message(
-                "正在處理請求", ephemeral=True, delete_after=5
-            )
+            await itat.response.send_message("正在處理請求", ephemeral=True, delete_after=5)
             await Functions._skip(self.guild_id)
 
     # Button to stop playback and disconnect
@@ -84,16 +72,10 @@ class Views:
             self.guild_id = guild_id
 
         async def callback(self, itat: discord.Interaction):
-            if not Checkers._is_dj(
-                itat
-            ) or not await Checkers._is_in_valid_voice_channel(itat):
-                await itat.response.send_message(
-                    "你沒有足夠的權限", ephemeral=True, delete_after=5
-                )
+            if not Checkers._is_dj(itat) or not await Checkers._is_in_valid_voice_channel(itat):
+                await itat.response.send_message("你沒有足夠的權限", ephemeral=True, delete_after=5)
                 return
-            await itat.response.send_message(
-                "正在處理請求", ephemeral=True, delete_after=5
-            )
+            await itat.response.send_message("正在處理請求", ephemeral=True, delete_after=5)
             # We call the main _stop functions which handles everything
             await Functions._stop(self.guild_id)
 
@@ -103,7 +85,5 @@ class Views:
             super().__init__(label="移出佇列", style=ButtonStyle.red)
 
         async def callback(self, itat: discord.Interaction):
-            await itat.response.send_message(
-                "本功能暫時不可用", ephemeral=True, delete_after=5
-            )
+            await itat.response.send_message("本功能暫時不可用", ephemeral=True, delete_after=5)
             # await Functions.remove_from_queue(self.guild_id, -1)

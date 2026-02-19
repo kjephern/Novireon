@@ -5,8 +5,8 @@ import yt_dlp
 from src.util.config import get_config
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("music.youtube")
-music_config = get_config("Music")
+logger = logging.getLogger("player.youtube")
+player_config = get_config("Player")
 youtube_base_url = "https://www.youtube.com/"
 youtube_watch_url = youtube_base_url + "watch?v="
 
@@ -87,7 +87,7 @@ class Youtube:
 
     @staticmethod
     async def get_youtube_search_results(
-        search_query: str, max_results: int = music_config["limits.max_yt_search_results"]
+        search_query: str, max_results: int = player_config["limits.max_yt_search_results"]
     ) -> dict:
         ydl_opts = {
             "quiet": True,

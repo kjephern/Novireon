@@ -4,7 +4,7 @@ Novireon is a versatile Discord bot built with `discord.py`, designed to enhance
 
 ## Features
 
-*   **🎵 Advanced Music System:**
+*   **🎵 Advanced Player System:**
     *   Play music from YouTube (single videos and playlists) and Monster Siren (Arknights music).
     *   Robust queue system managed in a MongoDB database.
     *   Interactive playback controls (pause, resume, skip, stop) via slash commands and buttons.
@@ -62,19 +62,19 @@ Novireon is a versatile Discord bot built with `discord.py`, designed to enhance
 
 All commands are implemented as slash commands for easy use.
 
-### Music Commands
+### Player Commands
 
-*   `/music play <request>`: Plays a song. The request can be a YouTube/Monster Siren URL or a search query.
-*   `/music play_playlist <request> [max_results]`: Adds a random selection of songs from a YouTube playlist to the queue. `max_results` defaults to 5, with a maximum of 25.
-*   `/music pause`: Pauses the current song.
-*   `/music resume`: Resumes playback.
-*   `/music skip`: Skips to the next song in the queue.
-*   `/music stop`: Stops playback, clears the queue, and disconnects the bot.
+*   `/player play <request>`: Plays a song. The request can be a YouTube/Monster Siren URL or a search query.
+*   `/player play_playlist <request> [max_results]`: Adds a random selection of songs from a YouTube playlist to the queue. `max_results` defaults to 5, with a maximum of 25.
+*   `/player pause`: Pauses the current song.
+*   `/player resume`: Resumes playback.
+*   `/player skip`: Skips to the next song in the queue.
+*   `/player stop`: Stops playback, clears the queue, and disconnects the bot.
 
-### Music Setup (Admin/DJ Permissions)
+### Player Setup (Admin/DJ Permissions)
 
-*   `/music_setup dj_role [role]`: Sets a "DJ" role that can control music playback. If no role is provided, the DJ role is cleared.
-*   `/music_setup channel [channel]`: Designates a specific text channel for music commands.
+*   `/player_setup dj_role [role]`: Sets a "DJ" role that can control music playback. If no role is provided, the DJ role is cleared.
+*   `/player_setup channel [channel]`: Designates a specific text channel for music commands.
 
 ### Server Logger (Admin Permissions)
 

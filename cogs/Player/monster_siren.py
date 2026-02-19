@@ -8,7 +8,7 @@ from pydub import AudioSegment
 import soundfile as sf
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("music.monster_siren")
+logger = logging.getLogger("player.monster_siren")
 
 
 class Monster_siren:

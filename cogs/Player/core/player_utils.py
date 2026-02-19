@@ -12,15 +12,15 @@ from pymongo import MongoClient
 from src.util.config import get_config
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("music.utils")
-music_config = get_config("Music")
+logger = logging.getLogger("player.utils")
+player_config = get_config("Player")
 
 mongo_client = MongoClient("mongodb://localhost:27017/", serverSelectionTimeoutMS=15000)
 
 db_handler = MongoCRUD(
     client=mongo_client,
     db_name="Norvireon_bot_db",
-    collection_name="Music_data",
+    collection_name="Player_data",
     logger=logger,
 )
 
@@ -133,7 +133,7 @@ def is_valid_url(url):
         return False
 
 
-def return_to_default_music_settings(guild_id):
+def return_to_default_player_settings(guild_id):
     try:
         played = db_handler.get(query={"_id": guild_id})[0].get("played", [])
         db_handler.update_many(
@@ -152,9 +152,9 @@ def return_to_default_music_settings(guild_id):
             },
             upsert=True,
         )
-        logger.info("returned to default music settings.")
+        logger.info("returned to default player settings.")
     except Exception as e:
-        logger.critical(f"Can not return to default music settings!")
+        logger.critical(f"Can not return to default player settings!")
 
 
 def create_queue_embed(data: dict) -> discord.Embed:
@@ -163,7 +163,7 @@ def create_queue_embed(data: dict) -> discord.Embed:
     duration = data.get("duration", None)
     author = data.get("author", "Unknown Artist")
     embed = discord.Embed(
-        color=music_config["colors.add_to_queue"],
+        color=player_config["colors.add_to_queue"],
         title=f"加入佇列:\n{title}",
         description=f"by {author}",
     )

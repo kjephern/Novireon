@@ -8,7 +8,7 @@ from pymongo import MongoClient
 from mongo_crud import MongoCRUD
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("music.setup")
+logger = logging.getLogger("player.setup")
 
 mongo_uri = os.getenv("MONGO_URI")
 mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=15000)
@@ -16,35 +16,35 @@ mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=15000)
 db_handler = MongoCRUD(
     client=mongo_client,
     db_name="Norvireon_bot_db",
-    collection_name="Music_data",
+    collection_name="Player_data",
     logger=logger,
 )
 
 
-class MusicSetup:
+class PlayerSetup:
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    music_setup = app_commands.Group(
-        name="music_setup",
-        description="Music setting up commands.",
+    player_setup = app_commands.Group(
+        name="player_setup",
+        description="Player setting up commands.",
         allowed_installs=app_commands.AppInstallationType(guild=True, user=False),
         default_permissions=discord.Permissions(manage_guild=True),
     )
 
-    @music_setup.command(name="channel", description="設定哪個語音頻道可以使用音樂指令。")
+    @player_setup.command(name="channel", description="設定哪個語音頻道可以使用音樂指令。")
     @app_commands.guild_install()
     @app_commands.describe(channel="用於發送指令的文字頻道ID，留白則允許所有頻道。")
-    async def set_music_channel(self, itat: discord.Interaction, channel: discord.TextChannel = None):
+    async def set_player_channel(self, itat: discord.Interaction, channel: discord.TextChannel = None):
         if channel:
-            db_handler.update_one(query={}, new_values={"music_channel_id": channel.id}, upsert=True)
+            db_handler.update_one(query={}, new_values={"player_channel_id": channel.id}, upsert=True)
             await itat.response.send_message(f"已設定{channel.mention}作為音樂指令頻道。", ephemeral=True)
         else:
             # If no channel is provided, remove the restriction
-            db_handler.update_one(query={}, new_values={"music_channel_id": None}, upsert=True)
+            db_handler.update_one(query={}, new_values={"player_channel_id": None}, upsert=True)
             await itat.response.send_message("音樂指令已在所有頻道允許", ephemeral=True)
 
-    @music_setup.command(name="dj_role", description="使定可控制音樂播放的身分組")
+    @player_setup.command(name="dj_role", description="使定可控制音樂播放的身分組")
     @app_commands.guild_install()
     @app_commands.describe(role="被指定為'DJ'的身分組。留白則僅管理員可控制。")
     async def set_dj_role(self, itat: discord.Interaction, role: discord.Role = None):
@@ -56,9 +56,9 @@ class MusicSetup:
             db_handler.update_one(query={}, new_values={"dj_role_id": None}, upsert=True)
             await itat.response.send_message("DJ身分組已被移除，僅管理員可控制音樂播放。", ephemeral=True)
 
-    @set_music_channel.error
+    @set_player_channel.error
     @set_dj_role.error
-    async def on_music_setup_error(self, itat: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_player_setup_error(self, itat: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, app_commands.MissingPermissions):
             await itat.response.send_message(
                 "You need the 'Manage Server' permission to use this command.",
@@ -70,4 +70,4 @@ class MusicSetup:
 
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(MusicSetup(bot))
+    await bot.add_cog(PlayerSetup(bot))

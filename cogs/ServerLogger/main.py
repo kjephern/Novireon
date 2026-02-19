@@ -6,7 +6,7 @@ import discord
 from discord import Message, Member, Embed, Color, User
 from discord.ext import commands
 
-from .utils import Utils
+from .utils import *
 
 import logging
 
@@ -58,7 +58,7 @@ class ServerLoggerMain:
         is_logging_enabled = settings.get("is_logging_enabled", False)
         if not is_logging_enabled:
             return
-        ignore_list = Utils.get_ignore_list(guild_id)
+        ignore_list = get_ignore_list(guild_id)
         if channel_id in ignore_list:
             return
         # 建立訊息

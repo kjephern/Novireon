@@ -18,28 +18,23 @@ db_handler = MongoCRUD(
 )
 
 
-class Utils:
-    @staticmethod
-    def get_ignore_list(guild_id: int):
-        data = db_handler.get(query={"_id": guild_id})
-        if data:
-            ignore_list = (
-                data[0]
-                .get("settings", {})
-                .get("logging_channel_id", {})
-                .get("ignore", [])
-            )
-        else:
-            ignore_list = []
-        return ignore_list
+def get_ignore_list(guild_id: int):
+    data = db_handler.get(query={"_id": guild_id})
+    if data:
+        ignore_list = (
+            data[0].get("settings", {}).get("logging_channel_id", {}).get("ignore", [])
+        )
+    else:
+        ignore_list = []
+    return ignore_list
 
-    @staticmethod
-    def ignore_channel(guild_id: int, channel_id: int):
-        ignore_list = Utils.get_ignore_list(guild_id)
-        if channel_id not in ignore_list:
-            ignore_list.append(channel_id)
-            db_handler.update_one(
-                query={"_id": guild_id},
-                new_values={"settings.logging_channel_id.ignore": ignore_list},
-                upsert=True,
-            )
+
+def ignore_channel(guild_id: int, channel_id: int):
+    ignore_list = get_ignore_list(guild_id)
+    if channel_id not in ignore_list:
+        ignore_list.append(channel_id)
+        db_handler.update_one(
+            query={"_id": guild_id},
+            new_values={"settings.logging_channel_id.ignore": ignore_list},
+            upsert=True,
+        )

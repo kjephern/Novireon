@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from .utils import Utils
+from .utils import *
 
 import logging
 
@@ -182,7 +182,7 @@ class ServerLoggerSetup:
         )
         # 於忽略列表中移除舊的預設頻道
         if old_channel_id:
-            ignore_list = Utils.get_ignore_list(guild_id)
+            ignore_list = get_ignore_list(guild_id)
             if old_channel_id in ignore_list:
                 ignore_list.remove(old_channel_id)
                 db_handler.update_one(
@@ -198,7 +198,7 @@ class ServerLoggerSetup:
             },
             upsert=True,
         )
-        Utils.ignore_channel(guild_id, channel.id)
+        ignore_channel(guild_id, channel.id)
 
         logger.info(
             f"Set {logging_type.value} logging channel for guild: {itat.guild.name}-{guild_id} to channel: {channel.name}-{channel.id}"

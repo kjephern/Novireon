@@ -74,6 +74,7 @@ def get_source_name(url: str):
     rules = {
         "youtube": ("youtube.com", "youtu.be"),
         "monster_siren": ("monster-siren.hypergryph.com",),
+        "spotify": ("open.spotify.com",),
     }
 
     for source_name, domains in rules.items():

@@ -15,6 +15,7 @@ from . import player_utils
 from .player_data import voice_data
 from .view.control_views import ControlView
 from ..youtube import Youtube
+from ..spotify import Spotify
 from ..monster_siren import Monster_siren
 
 from src.util.config import get_config
@@ -88,20 +89,39 @@ class Functions:
                     return
             case "monster_siren":
                 data = await Monster_siren.get_song_data(request)
+            case "spotify":
+                try:
+                    request: str = Spotify.get_spotify_song_data(request)
+                    print(request)
+                    results = await Youtube.get_youtube_search_results(request, 5)
+                    print(results)
+                    for result in results:
+                        if request.split(" ")[0] in result["title"]:
+                            url = result["url"]
+                            break
+                    data = await Youtube.get_data_from_single(url)
+                except:
+                    pass
             case "direct_audio":
-                duration = await player_utils.get_web_audio_duration(request)
-                avatar = itat.user.display_avatar.url if itat.user.display_avatar else None
-                data = {
-                    "author": "Unknown Artist",
-                    "title": "Unknown Title",
-                    "song_url": request,
-                    "duration": duration,
-                    "thumbnail": avatar,
-                }
+                try:
+                    duration = await player_utils.get_web_audio_duration(request)
+                    avatar = itat.user.display_avatar.url if itat.user.display_avatar else None
+                    data = {
+                        "author": "Unknown Artist",
+                        "title": "Unknown Title",
+                        "song_url": request,
+                        "duration": duration,
+                        "thumbnail": avatar,
+                    }
+                except:
+                    pass
             case "":
-                data = await Functions.search(itat, request)
-                if data is None:
-                    return
+                try:
+                    data = await Functions.search(itat, request)
+                except:
+                    pass
+            case _:
+                pass
         user = itat.user.nick if itat.user.nick else itat.user.name
         if data is None:
             await itat.followup.send("找不到相關的音樂，請嘗試其他關鍵字或網址", ephemeral=True)

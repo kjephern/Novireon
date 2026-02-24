@@ -7,3 +7,7 @@ class NotInValidVoiceChannel(app_commands.CheckFailure):
 
 class NotDJ(app_commands.CheckFailure):
     pass
+
+
+class TrackNotFound(app_commands.CheckFailure):
+    pass

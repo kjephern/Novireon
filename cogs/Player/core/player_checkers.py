@@ -27,7 +27,7 @@ db_handler = MongoCRUD(
 
 class Checkers:
     @staticmethod
-    async def _is_in_valid_voice_channel(itat: Itat):
+    def _is_in_valid_voice_channel(itat: Itat):
         guild_id = itat.guild_id
         if itat.user.voice is None:
             raise NotInValidVoiceChannel
@@ -49,7 +49,7 @@ class Checkers:
         return app_commands.check(Checkers._is_dj)
 
     @staticmethod
-    def _is_dj(itat: Itat) -> bool:
+    def _is_dj(itat: Itat):
         guild_id = itat.guild_id
         settings = db_handler.get(query={"_id": guild_id})[0]
         dj_role_id = settings.get("dj_role_id", None)

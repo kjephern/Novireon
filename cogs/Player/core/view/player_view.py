@@ -7,8 +7,9 @@ from discord.ui import Button
 from pymongo import MongoClient
 
 from mongo_crud import MongoCRUD
-from ..player_checkers import Checkers
-from ..player_functions import Functions
+from cogs.Player.core.player_checkers import Checkers
+from cogs.Player.core.player_functions import Functions
+from cogs.Player.core.player_errors import *
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("Player_Core")
@@ -39,13 +40,20 @@ class Views:
             self.guild_id = guild_id
 
         async def callback(self, itat: discord.Interaction):
-            if not Checkers._is_dj(itat) or not await Checkers._is_in_valid_voice_channel(itat):
-                await itat.response.send_message("你沒有足夠的權限", ephemeral=True, delete_after=5)
-                return
-            await itat.response.send_message("正在處理請求", ephemeral=True, delete_after=5)
             is_live = self.data["current_playing"].get("is_live", False)
             if is_live:
-                await itat.followup.send("直播無法暫停", ephemeral=True)
+                await itat.response.send_message("直播無法暫停", ephemeral=True)
+                return
+            try:
+                Checkers._is_dj(itat)
+                Checkers._is_in_valid_voice_channel(itat)
+            except NotDJ:
+                msg = "你沒有 DJ 權限"
+                await itat.response.send_message(msg, ephemeral=True)
+                return
+            except NotInValidVoiceChannel:
+                msg = "請加入有效的語音頻道"
+                await itat.response.send_message(msg, ephemeral=True)
                 return
             if self.is_paused:
                 await Functions._resume(self.guild_id)
@@ -59,9 +67,18 @@ class Views:
             self.guild_id = guild_id
 
         async def callback(self, itat: discord.Interaction):
-            if not Checkers._is_dj(itat) or not await Checkers._is_in_valid_voice_channel(itat):
-                await itat.response.send_message("你沒有足夠的權限", ephemeral=True, delete_after=5)
+            try:
+                Checkers._is_dj(itat)
+                Checkers._is_in_valid_voice_channel(itat)
+            except NotDJ:
+                msg = "你沒有 DJ 權限"
+                await itat.response.send_message(msg, ephemeral=True)
                 return
+            except NotInValidVoiceChannel:
+                msg = "請加入有效的語音頻道"
+                await itat.response.send_message(msg, ephemeral=True)
+                return
+
             await itat.response.send_message("正在處理請求", ephemeral=True, delete_after=5)
             await Functions._skip(self.guild_id)
 
@@ -72,8 +89,16 @@ class Views:
             self.guild_id = guild_id
 
         async def callback(self, itat: discord.Interaction):
-            if not Checkers._is_dj(itat) or not await Checkers._is_in_valid_voice_channel(itat):
-                await itat.response.send_message("你沒有足夠的權限", ephemeral=True, delete_after=5)
+            try:
+                Checkers._is_dj(itat)
+                Checkers._is_in_valid_voice_channel(itat)
+            except NotDJ:
+                msg = "你沒有 DJ 權限"
+                await itat.response.send_message(msg, ephemeral=True)
+                return
+            except NotInValidVoiceChannel:
+                msg = "請加入有效的語音頻道"
+                await itat.response.send_message(msg, ephemeral=True)
                 return
             await itat.response.send_message("正在處理請求", ephemeral=True, delete_after=5)
             # We call the main _stop functions which handles everything

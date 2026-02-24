@@ -21,7 +21,8 @@ class Player(commands.Cog, PlayerMain, PlayerSetup):
             msg = "請加入有效的語音頻道"
         elif isinstance(error, NotDJ):
             msg = "你沒有 DJ 權限"
-        return await itat.response.send_message(msg, ephemeral=True)
+        await itat.response.send_message(msg, ephemeral=True)
+        return
 
 
 async def setup(bot: commands.Bot):

@@ -300,25 +300,28 @@ class Functions:
             logger.error(f"skip command error: {e}")
 
     async def _stop(guild_id):
-        if guild_id not in voice_data:
-            return
+        try:
+            if guild_id not in voice_data:
+                return
 
-        if "playback_state_updater" not in voice_data[guild_id]:
-            return
+            if "playback_state_updater" not in voice_data[guild_id]:
+                return
 
-        if "client" not in voice_data[guild_id]:
-            return
+            if "client" not in voice_data[guild_id]:
+                return
 
-        voice_data[guild_id]["playback_state_updater"].cancel()
-        client: VC = voice_data[guild_id]["client"]
+            voice_data[guild_id]["playback_state_updater"].cancel()
+            client: VC = voice_data[guild_id]["client"]
 
-        if client.is_connected():
-            player_utils.return_to_default_player_settings(guild_id)
-            await client.disconnect(force=True)
-        await asyncio.sleep(1)
-        if guild_id in voice_data:
-            await voice_data[guild_id]["player_channel"].send("已停止並斷開連接")
-            del voice_data[guild_id]
+            if client.is_connected():
+                player_utils.return_to_default_player_settings(guild_id)
+                await client.disconnect(force=True)
+            await asyncio.sleep(1)
+            if guild_id in voice_data:
+                await voice_data[guild_id]["player_channel"].send("已停止並斷開連接")
+                del voice_data[guild_id]
+        except Exception as e:
+            logger.error(f"stop error: {e}")
 
     async def play_next(guild_id):
         try:

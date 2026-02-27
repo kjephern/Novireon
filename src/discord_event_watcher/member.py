@@ -1,7 +1,7 @@
 import discord
-from discord.ext import commands
-
 import logging
+
+from discord.ext import commands
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("discord_event_watcher.member")
@@ -22,9 +22,7 @@ class MemberWatcher:
         else:
             return
         server_logger_cog = self.bot.get_cog("ServerLogger")
-        await server_logger_cog.member_event(
-            before=before, after=after, event_type=event_type
-        )
+        await server_logger_cog.member_event(before=before, after=after, event_type=event_type)
 
     @commands.Cog.listener()
     async def on_user_update(self, before: discord.User, after: discord.User):
@@ -39,6 +37,4 @@ class MemberWatcher:
         else:
             return
         server_logger_cog = self.bot.get_cog("ServerLogger")
-        await server_logger_cog.user_event(
-            before=before, after=after, event_type=event_type
-        )
+        await server_logger_cog.user_event(before=before, after=after, event_type=event_type)

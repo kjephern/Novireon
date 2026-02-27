@@ -1,8 +1,8 @@
-# mongo_crud.py
 import logging
+
 from pymongo import MongoClient
-from pymongo.errors import PyMongoError
 from pymongo import ReturnDocument
+from pymongo.errors import PyMongoError
 
 
 class MongoCRUD:

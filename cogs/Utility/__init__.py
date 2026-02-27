@@ -1,7 +1,8 @@
 from discord.ext import commands
-from .ping import PingCommands
-from .miq import MIQ
-from .roll import Roll
+
+from Utility.ping import PingCommands
+from Utility.miq import MIQ
+from Utility.roll import Roll
 
 
 class Utility(commands.Cog, PingCommands, MIQ, Roll):

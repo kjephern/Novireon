@@ -1,8 +1,9 @@
 import discord
-from discord.ext import commands
-import os
-from dotenv import load_dotenv
 import logging
+import os
+
+from discord.ext import commands
+from dotenv import load_dotenv
 from logging_config import setup_logging
 
 
@@ -28,9 +29,7 @@ async def load_all_cogs(bot: commands.Bot):
                     await bot.load_extension(module_path)
                     loaded_packages.append(module_path)
                 except Exception as e:
-                    _log.error(
-                        f"Failed to load Cog Package {module_path}: {e}", exc_info=True
-                    )
+                    _log.error(f"Failed to load Cog Package {module_path}: {e}", exc_info=True)
     for package in loaded_packages:
         _log.info(f"Loaded Cog Package: {package}")
 

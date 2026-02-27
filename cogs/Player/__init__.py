@@ -1,9 +1,11 @@
-from discord.ext import commands
-from .main import PlayerMain
-from .core.errors import *
-from .core.setup import PlayerSetup
-
 import logging
+
+from discord.ext import commands
+
+from cogs.Player.main import PlayerMain
+from cogs.Player.core.errors import *
+from cogs.Player.core.setup import PlayerSetup
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("Player_Core")

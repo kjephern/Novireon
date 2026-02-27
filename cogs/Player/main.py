@@ -8,9 +8,9 @@ from discord.ext import commands
 from pymongo import MongoClient
 
 from mongo_crud import MongoCRUD
-from .core import utils
-from .core.checkers import Checkers
-from .core.functions import Functions
+from cogs.Player.core import utils
+from cogs.Player.core.checkers import Checkers
+from cogs.Player.core.functions import Functions
 
 from src.util.config import get_config
 

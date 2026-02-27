@@ -1,10 +1,11 @@
-from dotenv import load_dotenv
 import logging
 import os
 import spotipy
+
+from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyClientCredentials
 
-from .core.errors import TrackNotFound
+from cogs.Player.core.errors import TrackNotFound
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("player.spotify")

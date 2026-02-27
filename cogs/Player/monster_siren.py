@@ -1,13 +1,8 @@
-import io
 import json
 import logging
-import os
 import requests
-from urllib.parse import urlparse
-from pydub import AudioSegment
-import soundfile as sf
 
-from .core.utils import get_web_audio_duration
+from cogs.Player.core.utils import get_web_audio_duration
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("player.monster_siren")

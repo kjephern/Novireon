@@ -1,6 +1,6 @@
+import logging
 import os
 
-import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("server_logger.utils")

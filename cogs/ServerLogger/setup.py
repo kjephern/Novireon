@@ -1,18 +1,18 @@
+import discord
+import logging
 import os
 
-import discord
 from discord import app_commands
 from discord.ext import commands
+from pymongo import MongoClient
 
-from .utils import *
+from mongo_crud import MongoCRUD
+from ServerLogger.utils import *
 
-import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("server_logger.setup")
 
-from pymongo import MongoClient
-from mongo_crud import MongoCRUD
 
 mongo_uri = os.getenv("MONGO_URI")
 mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=15000)

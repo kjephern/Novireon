@@ -1,7 +1,7 @@
 from discord.ext import commands
 
-from .setup import ServerLoggerSetup
-from .main import ServerLoggerMain
+from ServerLogger.main import ServerLoggerMain
+from ServerLogger.setup import ServerLoggerSetup
 
 
 class ServerLogger(commands.Cog, ServerLoggerSetup, ServerLoggerMain):

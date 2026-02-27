@@ -6,9 +6,9 @@ from discord import Interaction as Itat
 from discord import VoiceClient as VC
 from pymongo import MongoClient
 
-from .data import voice_data
-from .errors import *
 from mongo_crud import MongoCRUD
+from cogs.Player.core.data import voice_data
+from cogs.Player.core.errors import *
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("player.checkers")

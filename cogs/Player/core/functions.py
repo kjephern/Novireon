@@ -11,12 +11,12 @@ from discord import VoiceClient as VC
 from pymongo import MongoClient
 
 from mongo_crud import MongoCRUD
-from . import utils
-from .data import voice_data
-from .view.control_views import ControlView
-from ..youtube import Youtube
-from ..spotify import Spotify
-from ..monster_siren import Monster_siren
+from cogs.Player.monster_siren import Monster_siren
+from cogs.Player.spotify import Spotify
+from cogs.Player.youtube import Youtube
+from cogs.Player.core import utils
+from cogs.Player.core.data import voice_data
+from cogs.Player.core.view.control_views import ControlView
 
 from src.util.config import get_config
 

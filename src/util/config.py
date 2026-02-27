@@ -1,7 +1,7 @@
 import tomllib
 import os
 from box import Box
-from config.global_config import *
+from config.path_config import *
 
 
 def get_config(name: str):

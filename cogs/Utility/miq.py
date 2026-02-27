@@ -8,7 +8,7 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 import requests
 
-from config.global_config import *
+from config.path_config import *
 from src.util.config import get_config
 
 logging.basicConfig(level=logging.INFO)

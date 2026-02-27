@@ -7,7 +7,7 @@ from discord.ext import commands
 from pymongo import MongoClient
 
 from mongo_crud import MongoCRUD
-from ServerLogger.utils import *
+from cogs.ServerLogger.utils import *
 
 
 logging.basicConfig(level=logging.INFO)

@@ -6,7 +6,7 @@ from datetime import datetime
 from discord import Message, Member, Embed, Color, User
 from discord.ext import commands
 
-from ServerLogger.utils import *
+from cogs.ServerLogger.utils import *
 
 import logging
 

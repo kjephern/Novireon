@@ -1,7 +1,7 @@
 from discord.ext import commands
 
-from discord_event_watcher.message import MessageWatcher
-from discord_event_watcher.member import MemberWatcher
+from src.discord_event_watcher.message import MessageWatcher
+from src.discord_event_watcher.member import MemberWatcher
 
 
 class DiscordEventWatcher(commands.Cog, MessageWatcher, MemberWatcher):

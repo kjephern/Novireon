@@ -8,9 +8,9 @@ from discord.ext import commands
 from pymongo import MongoClient
 
 from mongo_crud import MongoCRUD
-from .core import player_utils
-from .core.player_checkers import Checkers
-from .core.player_functions import Functions
+from .core import utils
+from .core.checkers import Checkers
+from .core.functions import Functions
 
 from src.util.config import get_config
 
@@ -99,7 +99,7 @@ class PlayerMain:
                 description = (
                     f"by {author} | 直播 | 由{requester}加入"
                     if data.get("is_live", False)
-                    else f"by {author} | 時長: {player_utils.format_time(duration)} | 由{requester}加入"
+                    else f"by {author} | 時長: {utils.format_time(duration)} | 由{requester}加入"
                 )
                 embed.add_field(
                     name=name[:256],

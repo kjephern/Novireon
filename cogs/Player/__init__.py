@@ -1,7 +1,7 @@
 from discord.ext import commands
 from .main import PlayerMain
-from .core.player_errors import *
-from .core.player_setup import PlayerSetup
+from .core.errors import *
+from .core.setup import PlayerSetup
 
 import logging
 

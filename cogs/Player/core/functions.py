@@ -11,8 +11,8 @@ from discord import VoiceClient as VC
 from pymongo import MongoClient
 
 from mongo_crud import MongoCRUD
-from . import player_utils
-from .player_data import voice_data
+from . import utils
+from .data import voice_data
 from .view.control_views import ControlView
 from ..youtube import Youtube
 from ..spotify import Spotify
@@ -75,12 +75,12 @@ class Functions:
         guild_id = itat.guild_id
         if guild_id not in voice_data:
             voice_data[guild_id] = {}
-            player_utils.return_to_default_player_settings(guild_id)
+            utils.return_to_default_player_settings(guild_id)
 
         voice_data[guild_id]["player_channel"] = itat.channel
         voice_data[guild_id]["itat"] = itat
 
-        match player_utils.get_source_name(request):
+        match utils.get_source_name(request):
             case "youtube":
                 try:
                     data = await Youtube.get_data_from_single(request)
@@ -104,7 +104,7 @@ class Functions:
                     pass
             case "direct_audio":
                 try:
-                    duration = await player_utils.get_web_audio_duration(request)
+                    duration = await utils.get_web_audio_duration(request)
                     avatar = itat.user.display_avatar.url if itat.user.display_avatar else None
                     data = {
                         "author": "Unknown Artist",
@@ -135,7 +135,7 @@ class Functions:
             await Functions._play(guild_id)
 
         else:
-            embed = player_utils.create_queue_embed(data)
+            embed = utils.create_queue_embed(data)
             await itat.channel.send(embed=embed)
 
     async def pre_play_playlist(itat: Itat, request, max_results, if_shuffle):
@@ -149,7 +149,7 @@ class Functions:
         guild_id = itat.guild_id
         if guild_id not in voice_data:
             voice_data[guild_id] = {}
-            player_utils.return_to_default_player_settings(guild_id)
+            utils.return_to_default_player_settings(guild_id)
 
         voice_data[guild_id]["player_channel"] = itat.channel
         voice_data[guild_id]["itat"] = itat
@@ -177,7 +177,7 @@ class Functions:
                 data = await Youtube.get_data_from_single(song["webpage_url"])
                 data.update({"requester": user})
                 db_handler.append(query={"_id": guild_id}, field="queue", value=data)
-                embed = player_utils.create_queue_embed(data)
+                embed = utils.create_queue_embed(data)
                 await itat.channel.send(embed=embed)
                 await asyncio.sleep(1)
             except Exception as e:
@@ -314,7 +314,7 @@ class Functions:
             client: VC = voice_data[guild_id]["client"]
 
             if client.is_connected():
-                player_utils.return_to_default_player_settings(guild_id)
+                utils.return_to_default_player_settings(guild_id)
                 await client.disconnect(force=True)
             await asyncio.sleep(1)
             if guild_id in voice_data:
@@ -442,7 +442,7 @@ class Functions:
                         logger.warning(f"Embed message has no embeds for guild {guild_id}.")
                         break
                     embed = embed_msg.embeds[0]
-                    new_progress_bar = player_utils.generate_progress_bar(guild_id)
+                    new_progress_bar = utils.generate_progress_bar(guild_id)
                     if embed.description != new_progress_bar:
                         embed.description = new_progress_bar
                         control_view = ControlView(guild_id)

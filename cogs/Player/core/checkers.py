@@ -6,8 +6,8 @@ from discord import Interaction as Itat
 from discord import VoiceClient as VC
 from pymongo import MongoClient
 
-from .player_data import voice_data
-from .player_errors import *
+from .data import voice_data
+from .errors import *
 from mongo_crud import MongoCRUD
 
 logging.basicConfig(level=logging.INFO)

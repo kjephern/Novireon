@@ -4,7 +4,7 @@ import os
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
-from .core.player_errors import TrackNotFound
+from .core.errors import TrackNotFound
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("player.spotify")

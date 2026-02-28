@@ -23,6 +23,8 @@ class Player(commands.Cog, PlayerMain, PlayerSetup):
             msg = "請加入有效的語音頻道"
         elif isinstance(error, NotDJ):
             msg = "你沒有 DJ 權限"
+        elif isinstance(error, NotInValidCommandChannel):
+            msg = "請使用正確的指令頻道"
         await itat.response.send_message(msg, ephemeral=True)
         return
 

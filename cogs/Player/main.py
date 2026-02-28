@@ -41,6 +41,7 @@ class PlayerMain:
 
     @player.command(name="play", description="播放音樂")
     @app_commands.describe(request="可使用網址或直接搜尋")
+    @Checkers.is_in_valid_command_channel()
     @Checkers.is_in_valid_voice_channel()
     async def command_play(self, itat: Itat, request: str):
         try:
@@ -57,6 +58,7 @@ class PlayerMain:
         max_results=f"最多加入幾首歌，預設{player_config["limits.default_song_count_add_via_playlist"]}，最多{player_config["limits.max_song_count_add_via_playlist"]}首",
         if_shuffle="是否以隨機順序加入佇列",
     )
+    @Checkers.is_in_valid_command_channel()
     @Checkers.is_in_valid_voice_channel()
     async def command_play_playlist(
         self,

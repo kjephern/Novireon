@@ -60,6 +60,12 @@ class Checkers:
     def _is_in_valid_command_channel(itat: Itat):
         guild_id = itat.guild_id
         settings = db_handler.get(query={"_id": guild_id})[0]
+        player_channel_id = settings.get("player_channel_id")
+        if player_channel_id is None:
+            return True
+        if itat.channel_id == player_channel_id:
+            return True
+        raise NotInValidCommandChannel
 
     @staticmethod
     def is_in_valid_voice_channel():
@@ -68,3 +74,7 @@ class Checkers:
     @staticmethod
     def is_dj():
         return app_commands.check(Checkers._is_dj)
+
+    @staticmethod
+    def is_in_valid_command_channel():
+        return app_commands.check(Checkers._is_in_valid_command_channel)

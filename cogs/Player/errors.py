@@ -5,6 +5,10 @@ class NotInValidVoiceChannel(app_commands.CheckFailure):
     pass
 
 
+class NotInValidCommandChannel(app_commands.CheckFailure):
+    pass
+
+
 class NotDJ(app_commands.CheckFailure):
     pass
 

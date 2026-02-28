@@ -15,7 +15,7 @@ from cogs.Player.monster_siren import Monster_siren
 from cogs.Player.spotify import Spotify
 from cogs.Player.youtube import Youtube
 from cogs.Player.core import utils
-from cogs.Player.core.data import voice_data
+from cogs.Player.data import voice_data
 from cogs.Player.core.view.control_views import ControlView
 
 from src.util.config import get_config

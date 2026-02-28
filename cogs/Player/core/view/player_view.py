@@ -9,7 +9,7 @@ from pymongo import MongoClient
 from mongo_crud import MongoCRUD
 from cogs.Player.core.checkers import Checkers
 from cogs.Player.core.functions import Functions
-from cogs.Player.core.errors import *
+from cogs.Player.errors import *
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("Player_Core")

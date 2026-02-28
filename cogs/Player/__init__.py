@@ -3,7 +3,7 @@ import logging
 from discord.ext import commands
 
 from cogs.Player.main import PlayerMain
-from cogs.Player.core.errors import *
+from cogs.Player.errors import *
 from cogs.Player.core.setup import PlayerSetup
 
 

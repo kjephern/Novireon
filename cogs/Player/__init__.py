@@ -4,7 +4,7 @@ from discord.ext import commands
 
 from cogs.Player.main import PlayerMain
 from cogs.Player.errors import *
-from cogs.Player.core.setup import PlayerSetup
+from cogs.Player.setup import PlayerSetup
 
 
 logging.basicConfig(level=logging.INFO)

@@ -41,14 +41,6 @@ class Checkers:
         return itat.user.voice.channel.id == client.channel.id
 
     @staticmethod
-    def is_in_valid_voice_channel():
-        return app_commands.check(Checkers._is_in_valid_voice_channel)
-
-    @staticmethod
-    def is_dj():
-        return app_commands.check(Checkers._is_dj)
-
-    @staticmethod
     def _is_dj(itat: Itat):
         guild_id = itat.guild_id
         settings = db_handler.get(query={"_id": guild_id})[0]
@@ -63,3 +55,16 @@ class Checkers:
                 return True
             else:
                 raise NotDJ
+
+    @staticmethod
+    def _is_in_valid_command_channel(itat: Itat):
+        guild_id = itat.guild_id
+        settings = db_handler.get(query={"_id": guild_id})[0]
+
+    @staticmethod
+    def is_in_valid_voice_channel():
+        return app_commands.check(Checkers._is_in_valid_voice_channel)
+
+    @staticmethod
+    def is_dj():
+        return app_commands.check(Checkers._is_dj)

@@ -61,11 +61,11 @@ class PlayerSetup:
     async def on_player_setup_error(self, itat: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, app_commands.MissingPermissions):
             await itat.response.send_message(
-                "You need the 'Manage Server' permission to use this command.",
+                '需要 "管理伺服器"權限來使用此指令',
                 ephemeral=True,
             )
         else:
-            await itat.response.send_message(f"An unexpected error occurred: {error}", ephemeral=True)
+            await itat.response.send_message(f"player setup error: {error}", ephemeral=True)
             raise error
 
 

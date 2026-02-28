@@ -18,11 +18,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("player.main")
 player_config = get_config("Player")
 
-ffmpeg_options = {
-    "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-    "options": '-vn -filter:a "volume=0.3"',
-}
-
 mongo_uri = os.getenv("MONGO_URI")
 mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=15000)
 

@@ -4,8 +4,7 @@ import yt_dlp
 
 from src.util.config import get_config
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("player.youtube")
+logger = logging.getLogger("player.youtube").setLevel(logging.INFO)
 player_config = get_config("Player")
 youtube_base_url = "https://www.youtube.com/"
 youtube_watch_url = youtube_base_url + "watch?v="

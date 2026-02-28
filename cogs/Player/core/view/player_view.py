@@ -11,8 +11,7 @@ from cogs.Player.core.checkers import Checkers
 from cogs.Player.core.functions import Functions
 from cogs.Player.errors import *
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("Player_Core")
+logger = logging.getLogger("player_view").setLevel(logging.INFO)
 
 mongo_uri = os.getenv("MONGO_URI")
 mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=15000)

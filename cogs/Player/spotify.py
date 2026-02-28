@@ -7,8 +7,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 
 from cogs.Player.errors import TrackNotFound
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("player.spotify")
+logger = logging.getLogger("player.spotify").setLevel(logging.INFO)
 load_dotenv()
 CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")

@@ -29,14 +29,11 @@ class MongoCRUD:
         self.db = self.client[db_name]
         self.collection = self.db[collection_name]
         self.logger = logger
-        self.logger.debug(f"Handler for collection '{collection_name}' initialized.")
 
     def get(self, query: dict):
         """根據查詢條件獲取文件。"""
-        self.logger.debug(f"Executing find with query: {query}")
         try:
             results = list(self.collection.find(query))
-            self.logger.debug(f"Found {len(results)} document(s) for query: {query}")
             return results
         except PyMongoError as e:
             self.logger.error(f"Failed to get data with query {query}: {e}", exc_info=True)
@@ -44,12 +41,9 @@ class MongoCRUD:
 
     def update_many(self, query: dict, new_values: dict = {}, upsert: bool = True):
         """更新文件。"""
-        self.logger.debug(f"Executing update_many with query: {query} and values: {new_values}")
         try:
             result = self.collection.update_many(query, {"$set": new_values}, upsert=upsert)
-            if result.matched_count > 0:
-                self.logger.debug(f"Matched {result.matched_count} and modified {result.modified_count} document(s).")
-            else:
+            if result.matched_count == 0:
                 self.logger.warning(f"Update query {query} did not match any documents.")
             return result
         except PyMongoError as e:
@@ -69,11 +63,7 @@ class MongoCRUD:
             # 使用 "$set" 來指定要更新的欄位
             result = self.collection.update_one(query, {"$set": new_values}, upsert=upsert)
 
-            if result.upserted_id:
-                self.logger.debug(f"Upserted new document with ID: {result.upserted_id}")
-            elif result.matched_count > 0:
-                self.logger.debug(f"Matched {result.matched_count} and modified {result.modified_count} document(s).")
-            else:
+            if result.matched_count == 0:
                 # 只有在 upsert=False 時，這個警告才有意義
                 if not upsert:
                     self.logger.warning(f"Update query {query} did not match any documents.")
@@ -87,9 +77,7 @@ class MongoCRUD:
         self.logger.debug(f"Executing push on field '{field}' with query: {query}")
         try:
             result = self.collection.update_one(query, {"$push": {field: value}})
-            if result.matched_count > 0:
-                self.logger.debug(f"Successfully appended value to field '{field}' for a matched document.")
-            else:
+            if result.matched_count == 0:
                 self.logger.warning(f"Append query {query} did not match any documents.")
             return result
         except PyMongoError as e:
@@ -109,7 +97,6 @@ class MongoCRUD:
         Returns:
             dict | None: 被彈出的元素 (如果成功)，否則返回 None。
         """
-        self.logger.debug(f"Executing atomic pop on field '{field}' with query: {query}")
         try:
             # 使用 find_one_and_update 進行原子性的 "查詢並更新"
             # return_document=ReturnDocument.BEFORE 會返回文件在被更新「之前」的樣子
@@ -135,7 +122,6 @@ class MongoCRUD:
             # 根據彈出的方向，返回正確的元素
             popped_element = array_before_pop[0] if direction == -1 else array_before_pop[-1]
 
-            self.logger.debug(f"Successfully popped element from field '{field}'.")
             return popped_element
 
         except PyMongoError as e:

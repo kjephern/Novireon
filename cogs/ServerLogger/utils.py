@@ -2,12 +2,10 @@ import logging
 import os
 
 from pymongo import MongoClient
-from typing import Literal
 
 from mongo_crud import MongoCRUD
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("server_logger.utils")
+logger = logging.getLogger("server_logger.utils").setLevel(logging.INFO)
 
 mongo_uri = os.getenv("MONGO_URI")
 mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=15000)

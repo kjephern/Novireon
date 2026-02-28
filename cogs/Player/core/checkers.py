@@ -10,8 +10,7 @@ from mongo_crud import MongoCRUD
 from cogs.Player.data import voice_data
 from cogs.Player.errors import *
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("player.checkers")
+logger = logging.getLogger("player.checkers").setLevel(logging.INFO)
 
 
 mongo_uri = os.getenv("MONGO_URI")

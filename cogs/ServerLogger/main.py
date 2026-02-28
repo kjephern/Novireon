@@ -5,13 +5,13 @@ import pytz
 from datetime import datetime
 from discord import Message, Member, Embed, Color, User
 from discord.ext import commands
+from typing import Literal
 
 from cogs.ServerLogger.utils import *
 
 import logging
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("server_logger.main")
+logger = logging.getLogger("server_logger.main").setLevel(logging.INFO)
 
 from pymongo import MongoClient
 from mongo_crud import MongoCRUD

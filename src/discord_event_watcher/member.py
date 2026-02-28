@@ -3,8 +3,7 @@ import logging
 
 from discord.ext import commands
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("discord_event_watcher.member")
+logger = logging.getLogger("discord_event_watcher.member").setLevel(logging.INFO)
 
 
 class MemberWatcher:

@@ -20,8 +20,7 @@ from cogs.Player.core.view.control_views import ControlView
 
 from src.util.config import get_config
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("player.functions")
+logger = logging.getLogger("player.functions").setLevel(logging.INFO)
 player_config = get_config("Player")
 
 ffmpeg_options = {

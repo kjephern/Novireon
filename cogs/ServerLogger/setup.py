@@ -10,8 +10,7 @@ from mongo_crud import MongoCRUD
 from cogs.ServerLogger.utils import *
 
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("server_logger.setup")
+logger = logging.getLogger("server_logger.setup").setLevel(logging.INFO)
 
 
 mongo_uri = os.getenv("MONGO_URI")

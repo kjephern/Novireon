@@ -7,8 +7,7 @@ from cogs.Player.errors import *
 from cogs.Player.setup import PlayerSetup
 
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("Player_Core")
+logger = logging.getLogger("Player_Core").setLevel(logging.INFO)
 
 
 class Player(commands.Cog, PlayerMain, PlayerSetup):

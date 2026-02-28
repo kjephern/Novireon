@@ -6,15 +6,36 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from logging_config import setup_logging
 
+from cogs.Utility.role_giver import RoleGiverView
 
 _log = logging.getLogger(__name__)
 
-load_dotenv()
-TOKEN = os.getenv("DISCORD")
 
-intents = discord.Intents.all()
+class Bot(commands.Bot):
+    def __init__(self):
+        super().__init__(command_prefix="!", intents=discord.Intents.all())
 
-bot = commands.Bot(command_prefix="!", intents=intents)
+    async def setup_hook(self):
+        self.add_view(RoleGiverView())
+
+
+bot = Bot()
+
+
+@bot.event
+async def on_ready():
+    await load_all_cogs(bot)
+    _log.info(f"Logged in as {bot.user.name} ({bot.user.id})")
+    _log.info("syncing...")
+    await bot.tree.sync()
+    for guild in bot.guilds:
+        print(f"- 伺服器: {guild.name} (ID: {guild.id})")
+    _log.info(">>Bot is online<<")
+
+
+@bot.event
+async def on_disconnect():
+    _log.info("Bot disconnected.")
 
 
 async def load_all_cogs(bot: commands.Bot):
@@ -34,23 +55,9 @@ async def load_all_cogs(bot: commands.Bot):
         _log.info(f"Loaded Cog Package: {package}")
 
 
-@bot.event
-async def on_ready():
-    setup_logging()
-    await load_all_cogs(bot)
-    _log.info(f"Logged in as {bot.user.name} ({bot.user.id})")
-    _log.info("syncing...")
-    await bot.tree.sync()
-    for guild in bot.guilds:
-        print(f"- 伺服器: {guild.name} (ID: {guild.id})")
-    _log.info(">>Bot is online<<")
-
-
-@bot.event
-async def on_disconnect():
-    _log.info("Bot disconnected.")
-
-
 if __name__ == "__main__":
+    load_dotenv()
+    TOKEN = os.getenv("DISCORD")
     if TOKEN:
+        setup_logging()
         bot.run(TOKEN)

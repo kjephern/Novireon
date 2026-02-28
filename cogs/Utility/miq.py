@@ -12,8 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 from config.path_config import *
 from src.util.config import get_config
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("MIQ")
+logger = logging.getLogger("MIQ").setLevel(logging.INFO)
 miq_config = get_config("MIQ")
 
 

@@ -14,8 +14,7 @@ from cogs.Player.core.functions import Functions
 
 from src.util.config import get_config
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("player.main")
+logger = logging.getLogger("player.main").setLevel(logging.INFO)
 player_config = get_config("Player")
 
 mongo_uri = os.getenv("MONGO_URI")

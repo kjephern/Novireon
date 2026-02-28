@@ -11,8 +11,7 @@ from pymongo import MongoClient
 
 from src.util.config import get_config
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("player.utils")
+logger = logging.getLogger("player.utils").setLevel(logging.INFO)
 player_config = get_config("Player")
 
 mongo_client = MongoClient("mongodb://localhost:27017/", serverSelectionTimeoutMS=15000)

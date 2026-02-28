@@ -25,3 +25,7 @@ def setup_logging():
     # 將 handler 加入到根記錄器
     root_logger.addHandler(console_handler)
     root_logger.addHandler(file_handler)
+
+    logging.getLogger("asyncio").setLevel(logging.WARNING)
+    logging.getLogger("discord").setLevel(logging.WARNING)
+    logging.getLogger("pymongo").setLevel(logging.WARNING)

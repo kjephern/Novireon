@@ -4,8 +4,7 @@ import requests
 
 from cogs.Player.core.utils import get_web_audio_duration
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("player.monster_siren")
+logger = logging.getLogger("player.monster_siren").setLevel(logging.INFO)
 
 
 class Monster_siren:

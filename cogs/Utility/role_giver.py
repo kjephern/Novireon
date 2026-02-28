@@ -6,17 +6,22 @@ from discord.ext import commands
 
 
 class RoleGiverView(discord.ui.View):
-    def __init__(self, roles: list[discord.Role] = None):
+    def __init__(
+        self,
+        roles: list[discord.Role] = None,
+        if_single: bool = False,
+    ):
         super().__init__(timeout=None)
 
         self.menu_custom_id = "role_giver_view"
+        self.if_single = if_single
 
         if roles is None:
             options = [discord.SelectOption(label="載入中", value="0")]
             max_vals = 1
         else:
             options = [discord.SelectOption(label=role.name[:100], value=str(role.id)) for role in roles]
-            max_vals = len(options)
+            max_vals = 1 if self.if_single else len(options)
 
         self.select = discord.ui.Select(
             custom_id=self.menu_custom_id,
@@ -40,7 +45,7 @@ class RoleGiverView(discord.ui.View):
                     break
 
         if not menu_role_ids:
-            return await interaction.response.send_message("❌ 無法讀取選單內容。", ephemeral=True)
+            return await interaction.response.send_message("無法讀取選單內容。", ephemeral=True)
 
         user = interaction.user
         guild = interaction.guild
@@ -69,10 +74,11 @@ class RoleGiverView(discord.ui.View):
 
 
 class RoleSetupView(discord.ui.View):
-    def __init__(self, roles: list[discord.Role], title: str):
+    def __init__(self, roles: list[discord.Role], title: str, if_single: bool):
         super().__init__(timeout=180)
         self.title = title
         self.message = None
+        self.if_single = if_single
 
         options = [discord.SelectOption(label=role.name[:100], value=str(role.id)) for role in roles]
 
@@ -84,8 +90,9 @@ class RoleSetupView(discord.ui.View):
 
     async def select_callback(self, interaction: discord.Interaction):
         selected_roles = [interaction.guild.get_role(int(role_id)) for role_id in self.select.values]
+        selected_roles.sort(key=lambda role: role.name)
 
-        giver_view = RoleGiverView(roles=selected_roles)
+        giver_view = RoleGiverView(roles=selected_roles, if_single=self.if_single)
 
         desc = "\n".join([f"▸ {role.mention}" for role in selected_roles])
         embed = discord.Embed(
@@ -121,7 +128,7 @@ class RoleGiver:
     )
 
     @role_giver.command(name="creat", description="建立身分組選擇選單")
-    async def creat_role_giver(self, itat: Itat, title: str):
+    async def creat_role_giver(self, itat: Itat, title: str, if_single: bool):
         available_roles = []
         for role in itat.guild.roles:
             if role.is_default():
@@ -135,7 +142,7 @@ class RoleGiver:
             if role.is_premium_subscriber():
                 continue
             available_roles.append(role)
-
+        available_roles.sort(key=lambda role: role.name)
         if len(available_roles) > 25:
             available_roles = available_roles[:25]
 
@@ -143,7 +150,7 @@ class RoleGiver:
             await itat.response.send_message("找不到機器人有權限分配的身分組。", ephemeral=True)
             return
 
-        setup_view = RoleSetupView(roles=available_roles, title=title)
+        setup_view = RoleSetupView(roles=available_roles, title=title, if_single=if_single)
 
         await itat.response.send_message(content="請選擇你要開放給玩家領取的身分組：", view=setup_view, ephemeral=True)
 

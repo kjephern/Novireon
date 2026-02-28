@@ -36,32 +36,13 @@ class ServerLoggerMain:
         else:
             return
         guild_id = message.guild.id
+        if not is_logging_enabled(guild_id):
+            return
         channel_id = message.channel.id
-        # 驗證設定
-        data = db_handler.get(query={"_id": guild_id})
-        if not data:
-            return
-        data = data[0]
-        settings = data.get("settings", {})
-        logging_channel_id = settings.get("logging_channel_id", {})
-        message_channel_id = logging_channel_id.get("message", None)
-        if not message_channel_id:
-            message_channel_id = logging_channel_id.get("default", None)
-            if not message_channel_id:
-                return
-        # 取得頻道
-        channel: discord.TextChannel = self.bot.get_channel(message_channel_id)
-        if not channel:
-            channel = await self.bot.fetch_channel(message_channel_id)
-        if not channel:
-            return
-        is_logging_enabled = settings.get("is_logging_enabled", False)
-        if not is_logging_enabled:
-            return
         ignore_list = get_ignore_list(guild_id)
         if channel_id in ignore_list:
             return
-        # 建立訊息
+        channel = await self.get_logging_channel(guild_id, "message")
         embed = Embed()
         embed.set_author(
             url=message.author.display_avatar.url,
@@ -85,7 +66,6 @@ class ServerLoggerMain:
             case "delete":
                 embed.title = f"訊息在 {before.jump_url} 被刪除"
                 embed.color = Color.red()
-        # 發送訊息
         taipei_tz = pytz.timezone("Asia/Taipei")
         current_time = datetime.now().timestamp()
         embed.set_footer(
@@ -96,26 +76,10 @@ class ServerLoggerMain:
 
     async def member_event(self, before: Member, after: Member, event_type: str):
         guild_id = after.guild.id
-        data = db_handler.get(query={"_id": guild_id})
-        if not data:
+
+        if not is_logging_enabled(guild_id):
             return
-        data = data[0]
-        settings = data.get("settings", {})
-        is_logging_enabled = settings.get("is_logging_enabled", False)
-        if not is_logging_enabled:
-            return
-        logging_channel_id = settings.get("logging_channel_id", {})
-        member_channel_id = logging_channel_id.get("member", None)
-        if not member_channel_id:
-            member_channel_id = logging_channel_id.get("default", None)
-            if not member_channel_id:
-                return
-            if member_channel_id:
-                channel: discord.TextChannel = self.bot.get_channel(member_channel_id)
-                if not channel:
-                    channel = await self.bot.fetch_channel(member_channel_id)
-                if not channel:
-                    return
+        channel = await self.get_logging_channel(guild_id, "member")
         embed = Embed()
         embed.set_author(
             icon_url=after.display_avatar.url,
@@ -174,26 +138,11 @@ class ServerLoggerMain:
         channels = []
         for guild in guilds:
             guild_id = guild.id
-            data = db_handler.get(query={"_id": guild_id})
-            if not data:
+            if not is_logging_enabled(guild_id):
                 return
-            data = data[0]
-            settings = data.get("settings", {})
-            is_logging_enabled = settings.get("is_logging_enabled", False)
-            if not is_logging_enabled:
-                return
-            logging_channel_id = settings.get("logging_channel_id", {})
-            member_channel_id = logging_channel_id.get("member", None)
-            if not member_channel_id:
-                member_channel_id = logging_channel_id.get("default", None)
-                if not member_channel_id:
-                    return
-                if member_channel_id:
-                    channel: discord.TextChannel = self.bot.get_channel(member_channel_id)
-                    if not channel:
-                        channel = await self.bot.fetch_channel(member_channel_id)
-                    if not channel:
-                        return
+            channel = await self.get_logging_channel(guild_id, "member")
+            if channel is None:
+                pass
             channels.append(channel)
         if not channels:
             return
@@ -256,6 +205,25 @@ class ServerLoggerMain:
         embed.set_footer(
             text=f"Member ID: {after.id}\nUpdated at {datetime.fromtimestamp(current_time,tz=taipei_tz).strftime('%Y-%m-%d %H:%M:%S')}"
         )
-        for channel in channels:
-            await channel.send(embed=embed, silent=True)
+        await channel.send(embed=embed, silent=True)
         return
+
+    async def get_logging_channel(self, guild_id: int, type: Literal["message", "member"]):
+        data = db_handler.get(query={"_id": guild_id})
+        if not data:
+            return
+        logging_channel_id = data[0].get("settings", {}).get("logging_channel_id", {})
+        if type in logging_channel_id:
+            channel_id = logging_channel_id[type]
+        else:
+            channel_id = logging_channel_id.get("default")
+        if channel_id is None:
+            return
+        if channel_id:
+            channel: discord.TextChannel = self.bot.get_channel(channel_id)
+            if channel is None:
+                channel = await self.bot.fetch_channel(channel_id)
+        if channel is None:
+            return
+        else:
+            return channel

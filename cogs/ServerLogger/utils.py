@@ -1,12 +1,13 @@
 import logging
 import os
 
+from pymongo import MongoClient
+from typing import Literal
+
+from mongo_crud import MongoCRUD
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("server_logger.utils")
-
-from pymongo import MongoClient
-from mongo_crud import MongoCRUD
 
 mongo_uri = os.getenv("MONGO_URI")
 mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=15000)
@@ -36,3 +37,12 @@ def ignore_channel(guild_id: int, channel_id: int):
             new_values={"settings.logging_channel_id.ignore": ignore_list},
             upsert=True,
         )
+
+
+def is_logging_enabled(guild_id: int):
+    data = db_handler.get(query={"_id": guild_id})
+    if not data:
+        return
+    data = data[0]
+    settings = data.get("settings", {})
+    return settings.get("is_logging_enabled", False)

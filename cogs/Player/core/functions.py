@@ -316,10 +316,10 @@ class Functions:
             if client.is_connected():
                 utils.return_to_default_player_settings(guild_id)
                 await client.disconnect(force=True)
-            await asyncio.sleep(1)
-            if guild_id in voice_data:
-                await voice_data[guild_id]["player_channel"].send("已停止並斷開連接")
-                del voice_data[guild_id]
+                await asyncio.sleep(1)
+                if "player_channel" in voice_data[guild_id]:
+                    await voice_data[guild_id]["player_channel"].send("已停止並斷開連接")
+                    del voice_data[guild_id]
         except Exception as e:
             logger.error(f"stop error: {e}")
 

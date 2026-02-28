@@ -33,7 +33,7 @@ class PlayerSetup:
     )
 
     @player_setup.command(name="channel", description="設定哪個語音頻道可以使用音樂指令。")
-    @app_commands.guild_install()
+    @app_commands.guild_only()
     @app_commands.describe(channel="用於發送指令的文字頻道ID，留白則允許所有頻道。")
     async def set_player_channel(self, itat: discord.Interaction, channel: discord.TextChannel = None):
         if channel:
@@ -45,7 +45,7 @@ class PlayerSetup:
             await itat.response.send_message("音樂指令已在所有頻道允許", ephemeral=True)
 
     @player_setup.command(name="dj_role", description="使定可控制音樂播放的身分組")
-    @app_commands.guild_install()
+    @app_commands.guild_only()
     @app_commands.describe(role="被指定為'DJ'的身分組。留白則僅管理員可控制。")
     async def set_dj_role(self, itat: discord.Interaction, role: discord.Role = None):
         if role:

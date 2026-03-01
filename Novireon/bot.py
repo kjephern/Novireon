@@ -29,7 +29,7 @@ async def on_ready():
     await bot.tree.sync()
     logging.info("已連接至以下伺服器")
     for guild in bot.guilds:
-        logging.info(f"伺服器: {guild.name} (ID: {guild.id})")
+        logging.info(f" - {guild.name} (ID: {guild.id})")
     logger.info(">>Bot is online<<")
 
 

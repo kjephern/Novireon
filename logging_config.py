@@ -28,4 +28,5 @@ def setup_logging():
 
     logging.getLogger("asyncio").setLevel(logging.WARNING)
     logging.getLogger("discord").setLevel(logging.WARNING)
+    logging.getLogger("discord.http").setLevel(100)
     logging.getLogger("pymongo").setLevel(logging.WARNING)

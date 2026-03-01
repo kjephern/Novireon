@@ -74,11 +74,12 @@ class RoleGiverView(discord.ui.View):
 
 
 class RoleSetupView(discord.ui.View):
-    def __init__(self, roles: list[discord.Role], title: str, if_single: bool):
+    def __init__(self, roles: list[discord.Role], title: str, if_single: bool, target_message: discord.Message = None):
         super().__init__(timeout=180)
         self.title = title
         self.message = None
         self.if_single = if_single
+        self.target_message = target_message
 
         options = [discord.SelectOption(label=role.name[:100], value=str(role.id)) for role in roles]
 
@@ -99,11 +100,16 @@ class RoleSetupView(discord.ui.View):
             title=self.title, description=f"請在下方選單選擇您需要的身分組：\n\n{desc}", color=discord.Colour.blue()
         )
 
-        await interaction.channel.send(embed=embed, view=giver_view)
+        if self.target_message:
+            await self.target_message.edit(embed=embed, view=giver_view)
+        else:
+            await interaction.channel.send(embed=embed, view=giver_view)
 
         for item in self.children:
             item.disabled = True
-        await interaction.response.edit_message(content="面板建立成功！", view=self)
+        await interaction.response.edit_message(
+            content=f"面板{"編輯"if self.target_message else "建立"}成功！", view=self
+        )
         self.stop()
 
     async def on_timeout(self):
@@ -154,4 +160,45 @@ class RoleGiver:
 
         await itat.response.send_message(content="請選擇你要開放給玩家領取的身分組：", view=setup_view, ephemeral=True)
 
+        setup_view.message = await itat.original_response()
+
+    @role_giver.command(name="edit", description="編輯已存在的身分組選擇面板")
+    async def edit_role_giver(self, itat: Itat, message_id: str, title: str, if_single: bool):
+        try:
+            target_message = await itat.channel.fetch_message(int(message_id))
+        except (ValueError, discord.NotFound):
+            return await itat.response.send_message(
+                "找不到該訊息！請確認訊息 ID 是否正確，且該訊息必須在此頻道中。", ephemeral=True
+            )
+        except discord.Forbidden:
+            return await itat.response.send_message("機器人沒有權限讀取此頻道的訊息。", ephemeral=True)
+
+        if target_message.author != self.bot.user:
+            return await itat.response.send_message("這不是機器人發出的訊息，無法編輯！", ephemeral=True)
+
+        available_roles = []
+        for role in itat.guild.roles:
+            if (
+                role.is_default()
+                or not role.is_assignable()
+                or role.is_bot_managed()
+                or role.is_integration()
+                or role.is_premium_subscriber()
+            ):
+                continue
+            available_roles.append(role)
+
+        available_roles.sort(key=lambda role: role.name)
+        if len(available_roles) > 25:
+            available_roles = available_roles[:25]
+
+        if not available_roles:
+            await itat.response.send_message("找不到機器人有權限分配的身分組。", ephemeral=True)
+            return
+
+        setup_view = RoleSetupView(
+            roles=available_roles, title=title, if_single=if_single, target_message=target_message
+        )
+
+        await itat.response.send_message(content="請選擇你要更新的身分組選項：", view=setup_view, ephemeral=True)
         setup_view.message = await itat.original_response()

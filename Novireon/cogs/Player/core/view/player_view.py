@@ -7,9 +7,9 @@ from discord.ui import Button
 from pymongo import MongoClient
 
 from mongo_crud import MongoCRUD
-from cogs.Player.core.checkers import Checkers
-from cogs.Player.core.functions import Functions
-from cogs.Player.errors import *
+from Novireon.cogs.Player.core.checkers import Checkers
+from Novireon.cogs.Player.core.functions import Functions
+from Novireon.cogs.Player.errors import *
 
 logger = logging.getLogger("player_view")
 logger.setLevel(logging.INFO)
@@ -55,6 +55,7 @@ class Views:
                 msg = "請加入有效的語音頻道"
                 await itat.response.send_message(msg, ephemeral=True)
                 return
+            await itat.response.send_message("正在處理請求", ephemeral=True)
             if self.is_paused:
                 await Functions._resume(self.guild_id)
             else:

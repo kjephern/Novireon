@@ -207,7 +207,10 @@ class Functions:
             try:
                 itat: Itat = voice_data[guild_id]["itat"]
                 if "client" not in voice_data[guild_id] or not voice_data[guild_id]["client"].is_connected():
-                    voice_client: VC = await itat.user.voice.channel.connect()
+                    try:
+                        voice_client: VC = await itat.user.voice.channel.connect(reconnect=False)
+                    except asyncio.TimeoutError:
+                        await itat.followup.send("無法連接至語音頻道", ephemeral=True)
                     voice_data[guild_id]["client"] = voice_client
                 else:
                     voice_client = voice_data[guild_id]["client"]
@@ -216,7 +219,7 @@ class Functions:
                 try:
                     source = discord.FFmpegOpusAudio(next_song_data["song_url"], **ffmpeg_options)
                 except Exception as e:
-                    logger.error(e)
+                    logger.error(f"FFmpegOpusAudio error: {e}")
                 voice_client.play(source, after=after_play)
 
             except Exception as e:

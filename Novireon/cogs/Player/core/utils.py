@@ -31,7 +31,15 @@ def format_time(seconds):
     return f"{hours}:{mins:02}:{secs:02}" if hours > 0 else f"{mins}:{secs:02}"
 
 
-def generate_progress_bar(guild_id):
+def generate_progress_bar(guild_id: int) -> str:
+    """to generate a playback progress bar
+
+    Args:
+        guild_id (int): the guild's id that is playing
+
+    Returns:
+        str: The progress bar
+    """
     data = db_handler.get(query={"_id": guild_id})[0]
     is_playing = data.get("is_playing")
     is_live = data["current_playing"].get("is_live", False)
@@ -59,7 +67,15 @@ def generate_progress_bar(guild_id):
         return f"已暫停\n`[{bar}]` `({format_time(elapsed)}/{format_time(duration)})`"
 
 
-def get_source_name(url: str):
+def get_source_name(url: str) -> str:
+    """Get where the source of the url is
+
+    Args:
+        url (str): The source URL
+
+    Returns:
+        str: Source
+    """
     if not isinstance(url, str):
         return ""
 
@@ -88,10 +104,14 @@ def get_source_name(url: str):
     return ""
 
 
-async def get_web_audio_duration(url: str):
-    """
-    獲取網路音訊檔案的時長 (秒)，支援 mp3, wav, ogg, flac, aac, m4a 等。
-    使用 ffprobe 進行分析，無需完整下載。
+async def get_web_audio_duration(url: str) -> int:
+    """get web audio duration
+
+    Args:
+        url (str): The web audio URL
+
+    Returns:
+        int: The duration of the web audio in seconds.
     """
     FFPROBE_PATH = "ffprobe"
     args = [
@@ -161,6 +181,14 @@ def return_to_default_player_settings(guild_id):
 
 
 def create_queue_embed(data: dict) -> discord.Embed:
+    """creat an embed for new item in queue
+
+    Args:
+        data (dict): {title, author, duration, song_url, thumbnail, is_live, requester}
+
+    Returns:
+        discord.Embed: The embed
+    """
     title = data.get("title", "Unknown Title")
     thumbnail = data.get("thumbnail", None)
     duration = data.get("duration", None)

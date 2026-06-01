@@ -43,7 +43,8 @@ class Checkers:
     @staticmethod
     def _is_dj(itat: Itat):
         guild_id = itat.guild_id
-        settings = db_handler.get(query={"_id": guild_id})[0]
+        results = db_handler.get(query={"_id": guild_id})
+        settings = results[0] if results else None
         dj_role_id = settings.get("dj_role_id", None)
 
         if itat.user.guild_permissions.administrator:
@@ -59,8 +60,12 @@ class Checkers:
     @staticmethod
     def _is_in_valid_command_channel(itat: Itat):
         guild_id = itat.guild_id
-        settings = db_handler.get(query={"_id": guild_id})[0]
-        player_channel_id = settings.get("player_channel_id")
+        data = db_handler.get(query={"_id": guild_id})
+        if not data:
+            return True
+        settings = data[0]
+        print(settings)
+        player_channel_id = settings.get("player_channel_id", None)
         if player_channel_id is None:
             return True
         if itat.channel_id == player_channel_id:

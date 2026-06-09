@@ -64,7 +64,6 @@ class Checkers:
         if not data:
             return True
         settings = data[0]
-        print(settings)
         player_channel_id = settings.get("player_channel_id", None)
         if player_channel_id is None:
             return True

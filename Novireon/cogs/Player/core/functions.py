@@ -91,9 +91,7 @@ class Functions:
             case "spotify":
                 try:
                     request: str = Spotify.get_spotify_song_data(request)
-                    print(request)
                     results = await Youtube.get_youtube_search_results(request, 5)
-                    print(results)
                     for result in results:
                         if request.split(" ")[0] in result["title"]:
                             url = result["url"]
